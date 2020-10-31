@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/python3.6
-
 import json
 
 import time
