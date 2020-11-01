@@ -20,7 +20,9 @@ class zillog:
         self.token = {"xsgd"  : self.mongodb["xsgd"], 
                       "gzil"  : self.mongodb["gzil"], 
                       "bolt"  : self.mongodb["bolt"], 
-                      "zlp"   : self.mongodb["zlp"]}
+                      "zlp"   : self.mongodb["zlp"],
+                      "zyf"   : self.mongodb["zyf"],
+                      "sergs" : self.mongodb["sergs"]}
         
         # Wallet address
         addr = "zil1y7kr7nh28p5j3tv76jm5nkp2yq56j8xwsq5utr"
