@@ -13,14 +13,16 @@
 {% block contents %}
 
 <div class="container body">
-  <div class="main_container">
+  <center>
+  <div class="main_container" style="max-width:1200px;">
 
-
+    
     <!-- page content -->
     <div class="right_col" role="main">
 
       <!-- top tiles -->
       <div class="row tile_count">
+        
         {% for name in stats_names %}
         <div class="col-md-3 col-sm-6 col-xs-6 tile_stats_count">
           <span class="count_top"><i class="fa fa-{{stats[name].icon}}"></i> {{ stats[name].label }}</span>
@@ -83,10 +85,26 @@
         </div>
 
       </div>
-
+      
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+        <center>
+          <h3>Objective</h3>
+          <p>Zildash is an open source tool for visualizing zilswap activity on the Zilliqa blockchain.</p>
+          <p>It's providing XSGD and GZIL charts.</p>
+          <p>The data is acquired from the zilswap smart contract and stored in a local MongoDB database.</p>
+          <p>The Zilgraph front-end provides visualized data using bokeh python library.</p>
+          <h3>Github</h3>
+          <a href="https://www.github.com/jsarcher/zilgraph">www.github.com/jsarcher/zilgraph</a>
+          <h3> </h3>
+        </center>
+        </div>
+      </div>
+     
     </div>
 
   </div>
+  </center>
 </div>
 <!-- /page content -->
 
