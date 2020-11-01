@@ -1,404 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Zilgraph</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" rel="stylesheet">
-</head>
-<body>
-<style>
-  .top-bottom-margin {
-     margin-top: 1cm;
-     margin-bottom: 1cm;
-  }
-</style>
+{% extends base %}
+{% block preamble %}
 
-<h1 class="top-bottom-margin"><center>Zilgraph</center></h1>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Custom Style -->
+  <link href="src/static/css/custom.min.css" rel="stylesheet">
 
-<div class="top-bottom-margin">
-    <center>
-        <button class="tablink" onclick="openPage('home', this, 'green')" id="defaultOpen">Home</button>
-        <button class="tablink" onclick="openPage('live', this, 'green')">Live</button>
-        <button class="tablink" onclick="openPage('about', this, 'green')">About</button>
-    </center>
-</div>
+{% endblock %}
 
-<div id="home" class="tabcontent">
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="gzil_canvas"></canvas>
-                </div>
-            </div>
+{% block contents %}
+
+<div class="container body">
+  <div class="main_container">
+
+
+    <!-- page content -->
+    <div class="right_col" role="main">
+
+      <!-- top tiles -->
+      <div class="row tile_count">
+        {% for name in stats_names %}
+        <div class="col-md-3 col-sm-6 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-{{stats[name].icon}}"></i> {{ stats[name].label }}</span>
+          <div class="count">{{ stats[name].value }}</div>
+          {% set color = "green" if stats[name].change >0 else "red" %}
+          {% set dir = "asc" if stats[name].change >0 else "desc" %}
+          <span class="count_bottom"><i class="{{color}}"}><i class="fa fa-sort-{{dir}}"></i>{{ stats[name].change }}% </i> From last Week</span>
         </div>
-    </div>
-</div>
+        {% endfor %}
+      </div>
+      <!-- /top tiles -->
+      
+      <div class="row">
 
-<p class="top-bottom-margin"> </p>
-
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="xsgd_canvas"></canvas>
+          <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel tile overflow_hidden">
+              <div class="row x_title">
+                <div class="col-md-6">
+                  <h3> Price Chart <small> ZIL Rates</small></h3>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-</div>
-
-<div id="live" class="tabcontent">
-
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="gzil_canvas_live"></canvas>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4 col-sm-4 col-xs-4">
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<p class="top-bottom-margin"> </p>
-
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <canvas id="xsgd_canvas_live"></canvas>
+                <div class="col-md-4 col-sm-4 col-xs-4">
                 </div>
+                <div class="col-md-4 col-sm-4 col-xs-4">
+                  {{ embed(roots.dropdown) }}
+                </div>
+              </div>
+              
+              {{ embed(roots.line) }}
             </div>
+          </div>
+
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-6 col-sm-6 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <div class="x_title">
+              <h2>Liquitidy Distribution</h2>
+              <div class="clearfix"></div>
+            </div>
+            {{ embed(roots.region) }}
+          </div>
         </div>
+
+
+        <div class="col-md-6 col-sm-6 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <div class="x_title">
+              <h2>Token Details</h2>
+              <div class="clearfix"></div>
+            </div>
+            {{ embed(roots.table) }}
+          </div>
+        </div>
+
+      </div>
+
     </div>
+
+  </div>
 </div>
+<!-- /page content -->
 
-</div>
-
-<div id="about" class="tabcontent">
-<center>
-<h3>Objective</h3>
-
-<p>Zilgraph is an open source tool for visualizing zilswap activity on the Zilliqa blockchain.</p>
-
-<p>It's providing XSGD and GZIL live charts.</p>
-
-<p>The data is acquired from the zilswap smart contract and stored in a local MongoDB database.</p>
-
-<p>The Zilgraph front-end provides live visualized data using flask and chartjs.</p>
-
-
-<h3>Github</h3>
-
-<a href="https://www.github.com/jsarcher/zilgraph">www.github.com/jsarcher/zilgraph</a>
-
-</center>
-</div>
-
-<!--suppress JSUnresolvedLibraryURL -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-<!--suppress JSUnresolvedLibraryURL -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<!--suppress JSUnresolvedLibraryURL -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
-<script>
-
-function openPage(pageName, elmnt, color) {
-  // Hide all elements with class="tabcontent" by default */
-  var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-
-  // Remove the background color of all tablinks/buttons
-  tablinks = document.getElementsByClassName("tablink");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].style.backgroundColor = "";
-  }
-
-  // Show the specific tab content
-  document.getElementById(pageName).style.display = "block";
-
-  // Add the specific color to the button used to open the tab content
-  elmnt.style.backgroundColor = color;
-}
-
-// Get the element with id="defaultOpen" and click on it
-document.getElementById("defaultOpen").click();
-
-</script>
-<script>
-    $(document).ready(function () {
-        const config = {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: "gZIL price",
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    data: [],
-                    fill: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'gZIL Zilswap exchange rates'
-                },
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
-                },
-                scales: {
-                    xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Time'
-                        }
-                    }],
-                    yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'ZIL'
-                        }
-                    }]
-                }
-            }
-        };
-
-        const context = document.getElementById('gzil_canvas').getContext('2d');
-
-        const lineChart = new Chart(context, config);
-
-        const source = new EventSource("/gzil-chart-data");
-
-        source.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (config.data.labels.length === 100) {
-                config.data.labels.shift();
-                config.data.datasets[0].data.shift();
-            }
-            config.data.labels.push(data.time);
-            config.data.datasets[0].data.push(data.value);
-            lineChart.update();
-        }
-    });
-</script>
-<script>
-    $(document).ready(function () {
-        const config = {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: "XSGD price",
-                    backgroundColor: 'rgb(0, 99, 132)',
-                    borderColor: 'rgb(0, 99, 132)',
-                    data: [],
-                    fill: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'XSGD Zilswap exchange rates'
-                },
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
-                },
-                scales: {
-                    xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Time'
-                        }
-                    }],
-                    yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'ZIL'
-                        }
-                    }]
-                }
-            }
-        };
-
-        const context = document.getElementById('xsgd_canvas').getContext('2d');
-
-        const lineChart = new Chart(context, config);
-
-        const source = new EventSource("/xsgd-chart-data");
-
-        source.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (config.data.labels.length === 100) {
-                config.data.labels.shift();
-                config.data.datasets[0].data.shift();
-            }
-            config.data.labels.push(data.time);
-            config.data.datasets[0].data.push(data.value);
-            lineChart.update();
-        }
-    });
-</script>
-
-
-<script>
-    $(document).ready(function () {
-        const config = {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: "gZIL price",
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    data: [],
-                    fill: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'gZIL Zilswap exchange rates'
-                },
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
-                },
-                scales: {
-                    xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Time'
-                        }
-                    }],
-                    yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'ZIL'
-                        }
-                    }]
-                }
-            }
-        };
-
-        const context = document.getElementById('gzil_canvas_live').getContext('2d');
-
-        const lineChart = new Chart(context, config);
-
-        const source = new EventSource("/gzil-chart-data-live");
-
-        source.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (config.data.labels.length === 100) {
-                config.data.labels.shift();
-                config.data.datasets[0].data.shift();
-            }
-            config.data.labels.push(data.time);
-            config.data.datasets[0].data.push(data.value);
-            lineChart.update();
-        }
-    });
-</script>
-<script>
-    $(document).ready(function () {
-        const config = {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: "XSGD price",
-                    backgroundColor: 'rgb(0, 99, 132)',
-                    borderColor: 'rgb(0, 99, 132)',
-                    data: [],
-                    fill: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'XSGD Zilswap exchange rates'
-                },
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
-                },
-                scales: {
-                    xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Time'
-                        }
-                    }],
-                    yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'ZIL'
-                        }
-                    }]
-                }
-            }
-        };
-
-        const context = document.getElementById('xsgd_canvas_live').getContext('2d');
-
-        const lineChart = new Chart(context, config);
-
-        const source = new EventSource("/xsgd-chart-data-live");
-
-        source.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (config.data.labels.length === 100) {
-                config.data.labels.shift();
-                config.data.datasets[0].data.shift();
-            }
-            config.data.labels.push(data.time);
-            config.data.datasets[0].data.push(data.value);
-            lineChart.update();
-        }
-    });
-</script>
-
-
-</body>
-</html>
+{% endblock %}
