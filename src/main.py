@@ -21,7 +21,7 @@ import pymongo
 
 
 
-tokens = ["gzil", "xsgd", "bolt", "zlp", "zyf", "sergs"]
+tokens = ["gzil", "xsgd", "bolt", "zlp"]
 tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP", "ZYF", "SERGS"]
 
 tok_upper_to_down = {"GZIL"  : "gzil", 
@@ -226,7 +226,7 @@ curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 
 curdoc().template_variables['stats'] = {
     'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  4   , 'label': 'Total Liquidity'},
     'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  1.2 , 'label': 'XSGD Liquidity'},
-    'pairs'     : {'icon': 'user',        'value': 6, 'change':  0.0 , 'label': 'Number of Tokens'},
+    'pairs'     : {'icon': 'user',        'value': 4, 'change':  0.0 , 'label': 'Verified Tokens'},
     'sales'     : {'icon': 'dollar',      'value': str(int(_rate['gzil'][-1])) + " ZIL",  'change': -0.2 , 'label': 'gZIL Token Price'},
 }
 
