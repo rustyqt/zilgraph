@@ -221,7 +221,7 @@ for tok in tokens:
     total_liq += _liq[tok][-1]
 
 
-curdoc().title = "Zilswap Dashboard"
+curdoc().title = "Zilgraph - A Zilswap Dashboard"
 curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']
 curdoc().template_variables['stats'] = {
     'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  4   , 'label': 'Total Liquidity'},
