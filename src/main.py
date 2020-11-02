@@ -21,7 +21,7 @@ import pymongo
 
 
 
-tokens = ["gzil", "xsgd", "bolt", "zlp"]
+tokens = ["gzil", "xsgd", "bolt", "zlp", "zyf", "sergs"]
 tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP", "ZYF", "SERGS"]
 
 tok_upper_to_down = {"GZIL"  : "gzil", 
