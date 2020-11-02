@@ -8,7 +8,7 @@ from bokeh.io import curdoc
 from bokeh.layouts import column, gridplot, row
 from bokeh.models import (ColumnDataSource, DataTable, NumberFormatter,
                           RangeTool, StringFormatter, TableColumn, HoverTool, Select, Slider, Div)
-from bokeh.palettes import Spectral6
+from bokeh.palettes import Spectral4
 from bokeh.plotting import figure
 from bokeh.transform import cumsum
 
@@ -21,8 +21,8 @@ import pymongo
 
 
 
-tokens = ["gzil", "xsgd", "bolt", "zlp", "zyf", "sergs"]
-tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP", "ZYF", "SERGS"]
+tokens = ["gzil", "xsgd", "bolt", "zlp"]
+tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
 
 tok_upper_to_down = {"GZIL"  : "gzil", 
                      "XSGD"  : "xsgd", 
@@ -99,7 +99,7 @@ p = figure(plot_height=110, tools="", toolbar_location=None, #name="line",
            x_axis_type="datetime", x_range=(_time[_tok][lower_bound], _time[_tok][upper_bound]), sizing_mode="scale_width")
 
 p.line('date', 'close', source=source, line_width=2, alpha=0.7)
-p.yaxis.axis_label = 'Traffic'
+p.yaxis.axis_label = 'ZIL'
 p.background_fill_color="#f5f5f5"
 p.grid.grid_line_color="white"
 
@@ -163,9 +163,9 @@ x = Counter(pie_dict)
 
 data = pd.DataFrame.from_dict(dict(x), orient='index').reset_index().rename(index=str, columns={0:'value', 'index':'token'})
 data['angle'] = data['value']/sum(x.values()) * 2*pi
-data['color'] = Spectral6
+data['color'] = Spectral4
 
-region = figure(plot_height=350, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.4, 1))
+region = figure(plot_height=350, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
 
 region.annular_wedge(x=-0, y=1, inner_radius=0.2, outer_radius=0.32,
                   start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
@@ -191,10 +191,10 @@ table_dict = {}
 table_dict["tok"]  = []
 table_dict["rate"] = []
 table_dict["liq"]  = []
-for tok in tokens:
+for tok in tokens_upper:
     table_dict["tok"].append(tok)
-    table_dict["rate"].append(round(_rate[tok][-1],2))
-    table_dict["liq"].append(int(_liq[tok][-1]))
+    table_dict["rate"].append(round(_rate[tok_upper_to_down[tok]][-1],2))
+    table_dict["liq"].append(int(_liq[tok_upper_to_down[tok]][-1]))
 
 
 pdsource = ColumnDataSource(data=pd.DataFrame(table_dict))
@@ -226,7 +226,7 @@ curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 
 curdoc().template_variables['stats'] = {
     'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  4   , 'label': 'Total Liquidity'},
     'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  1.2 , 'label': 'XSGD Liquidity'},
-    'pairs'     : {'icon': 'user',        'value': 4, 'change':  0.0 , 'label': 'Verified Tokens'},
+    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  0.0 , 'label': 'Verified Tokens'},
     'sales'     : {'icon': 'dollar',      'value': str(int(_rate['gzil'][-1])) + " ZIL",  'change': -0.2 , 'label': 'gZIL Token Price'},
 }
 
