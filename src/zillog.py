@@ -40,9 +40,11 @@ class zillog:
             try:    
                 new_entry = self.swap.get_market(tok)
                 self.token[tok].insert_one(new_entry)
+                print(new_entry)
             except:
                 print("Error: MongoDB insert_one() " + tok)
-        
+
+
             # Print database
             if debug:
                 for x in self.token[tok].find():
