@@ -90,7 +90,7 @@ source = ColumnDataSource(data=dict(date=_time[_tok][-min(_len):], close=_rate[_
 #lower_bound = int(len(_time[_tok][-400:])/2)
 
 upper_bound = int(len(_time[_tok])-1)
-lower_bound = int(len(_time[_tok])-min(_len)/4)
+lower_bound = int(len(_time[_tok])-min(_len)/2)
 
 #upper_bound = len(_time[_tok])-1
 #lower_bound = len(_time[_tok])-min(_len)+1
