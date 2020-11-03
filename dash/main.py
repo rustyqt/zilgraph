@@ -21,15 +21,15 @@ import pymongo
 
 
 
-tokens = ["gzil", "xsgd", "bolt", "zlp"]
-tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
+tokens = ["gzil", "xsgd", "bolt", "zlp" ,"SHRK”]
+tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP”, “SHRK”]
 
 tok_upper_to_down = {"GZIL"  : "gzil", 
                      "XSGD"  : "xsgd", 
                      "BOLT"  : "bolt", 
                      "ZLP"   : "zlp", 
                      "ZYF"   : "zyf", 
-                     "SERGS" : "sergs"}
+                     “SHRK” : “SHRK”}
 
 _time = {}
 _rate = {}
