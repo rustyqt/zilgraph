@@ -43,14 +43,14 @@ class zilswap:
         self.bolt  = Account(address="zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0")
         self.zyf   = Account(address="zil1arrjugcg28rw8g9zxpa6qffc6wekpwk2alu7kj")
         self.zlp   = Account(address="zil1l0g8u6f9g0fsvjuu74ctyla2hltefrdyt7k5f4")
-        self.shrk = Account(address= "zil17tsmlqgnzlfxsq4evm6n26txm2xlp5hele0kew")
+        self.shrk  = Account(address= "zil17tsmlqgnzlfxsq4evm6n26txm2xlp5hele0kew")
         
         self.token = {"gzil"  : self.gzil,
                       "xsgd"  : self.xsgd,
                       "bolt"  : self.bolt,
                       "zlp"   : self.zlp,
                       "zyf"   : self.zyf,
-                      "sergs" : self.shrk}
+                      “shrk” : self.shrk}
         
         self.decimals = {"gzil"  : 15,
                          "xsgd"  : 6,
