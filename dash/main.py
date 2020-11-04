@@ -20,118 +20,93 @@ from datetime import datetime
 import pymongo
 
 
-
 tokens = ["gzil", "xsgd", "bolt", "zlp"]
 tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
 
 tok_upper_to_down = {"GZIL"  : "gzil", 
                      "XSGD"  : "xsgd", 
                      "BOLT"  : "bolt", 
-                     "ZLP"   : "zlp", 
-                     "ZYF"   : "zyf", 
-                     "SERGS" : "sergs"}
-
-_time = {}
-_rate = {}
-_liq = {}
-
+                     "ZLP"   : "zlp"}
+    
 
 ###########################
 ### Update Price Chart ####
 ###########################
 
 def update_chart(attrname, old, new):
-    mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    mongodb = mongoclient["zillog"]
+    tok = tok_upper_to_down[new]
     
-    _tok = tok_upper_to_down[new]
+    source.data.update(ohlc_1h[tok])
     
-    for tok in tokens:
-        _time[tok] = np.empty([0,1], dtype=np.datetime64)
-        _rate[tok] = np.empty([0,1], dtype=float)
-        _liq[tok]  = np.empty([0,1], dtype=float)
-        
-        for x in mongodb[tok].find():
-            _time[tok] = np.append(_time[tok], np.datetime64(x['_id'], 's'))
-            _rate[tok] = np.append(_rate[tok], x['rate'])
-            _liq[tok]  = np.append(_liq[tok], x['liq_zil'])
-
-    source.data.update(dict(date=_time[_tok][-min(_len):], close=_rate[_tok][-min(_len):]))
-
-
     
 ###########################
 ###  Init Price Chart  ####
 ###########################
 
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
-mongodb = mongoclient["zillog"]
+mongodb = mongoclient["zilcrawl"]
 
-_tok = tok_upper_to_down['XSGD']
+ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
+          "gzil"  : mongodb["ohlc_1h_gzil"], 
+          "bolt"  : mongodb["ohlc_1h_bolt"], 
+          "zlp"   : mongodb["ohlc_1h_zlp"]}
 
-_len = []
+ohlc_1h = {}
 for tok in tokens:
-    _time[tok] = np.empty([0,1], dtype=np.datetime64)
-    _rate[tok] = np.empty([0,1], dtype=float)
-    _liq[tok]  = np.empty([0,1], dtype=float)
+    for x in ohlcdb[tok].find().sort('_id'):
+        if tok not in ohlc_1h:
+            ohlc_1h[tok] = {}
+            ohlc_1h[tok]['time']    = x['time']
+            ohlc_1h[tok]['open']    = x['open']
+            ohlc_1h[tok]['high']    = x['high']
+            ohlc_1h[tok]['low']     = x['low']
+            ohlc_1h[tok]['close']   = x['close']
+            ohlc_1h[tok]['average'] = x['average']
+            ohlc_1h[tok]['color']   = x['color']
     
-    for x in mongodb[tok].find():
-        _time[tok] = np.append(_time[tok], np.datetime64(x['_id'], 's'))
-        _rate[tok] = np.append(_rate[tok], x['rate'])
-        _liq[tok]  = np.append(_liq[tok], x['liq_zil'])
-    
-    _len.append(len(_time[tok]))
-    
-min(_len)
-    
-source = ColumnDataSource(data=dict(date=_time[_tok][-min(_len):], close=_rate[_tok][-min(_len):]))
-            
-#upper_bound = int(len(_time[_tok][-400:])-1)
-#lower_bound = int(len(_time[_tok][-400:])/2)
+        ohlc_1h[tok]['time'].append(x['time'][0])
+        ohlc_1h[tok]['open'].append(x['open'][0])
+        ohlc_1h[tok]['high'].append(x['high'][0])
+        ohlc_1h[tok]['low'].append(x['low'][0])
+        ohlc_1h[tok]['close'].append(x['close'][0])
+        ohlc_1h[tok]['average'].append(x['average'][0])
+        ohlc_1h[tok]['color'].append(x['color'][0])
+        
+mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
+mongodb = mongoclient["zilcrawl"]
 
-upper_bound = int(len(_time[_tok])-1)
-lower_bound = int(len(_time[_tok])-min(_len)/2)
+_tok = "xsgd"
 
-#upper_bound = len(_time[_tok])-1
-#lower_bound = len(_time[_tok])-min(_len)+1
+ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
+          "gzil"  : mongodb["ohlc_1h_gzil"], 
+          "bolt"  : mongodb["ohlc_1h_bolt"], 
+          "zlp"   : mongodb["ohlc_1h_zlp"]}
 
-p = figure(plot_height=110, tools="", toolbar_location=None, #name="line",
-           x_axis_type="datetime", x_range=(_time[_tok][lower_bound], _time[_tok][upper_bound]), sizing_mode="scale_width")
 
-p.line('date', 'close', source=source, line_width=2, alpha=0.7)
-p.yaxis.axis_label = 'ZIL'
-p.background_fill_color="#f5f5f5"
-p.grid.grid_line_color="white"
+source = ColumnDataSource(dict(time=[], average=[], low=[], high=[], open=[], close=[], color=[]))
 
-select = figure(plot_height=50, plot_width=800, y_range=p.y_range,
-                x_axis_type="datetime", y_axis_type=None,
-                tools="", toolbar_location=None, sizing_mode="scale_width")
+p = figure(plot_height=200, tools="pan,wheel_zoom,box_zoom,reset", x_axis_type="datetime", y_axis_location="right")
+p.x_range.follow = "end"
+p.x_range.follow_interval = 1000000000
+p.x_range.range_padding = 0
 
-range_rool = RangeTool(x_range=p.x_range)
-range_rool.overlay.fill_color = "navy"
-range_rool.overlay.fill_alpha = 0.2
+p.line(x='time', y='average', alpha=0.2, line_width=3, color='navy', source=source)
+p.line(x='time', y='ma', alpha=0.8, line_width=2, color='orange', source=source)
+p.segment(x0='time', y0='low', x1='time', y1='high', line_width=2, color='black', source=source)
+p.segment(x0='time', y0='open', x1='time', y1='close', line_width=8, color='color', source=source)
 
-select.line('date', 'close', source=source)
-select.ygrid.grid_line_color = None
-select.add_tools(range_rool)
-select.toolbar.active_multi = range_rool
-select.background_fill_color="#f5f5f5"
-select.grid.grid_line_color="white"
-select.x_range.range_padding = 0.01
-
-hover = HoverTool()
-hover.tooltips = """
-<div style=padding=5px>Time:@date</div>
-<div style=padding=5px>Rate:@close</div>
-"""
-hover.mode = "vline"
-
-p.add_tools(hover)
-
-layout = column(p, select, sizing_mode="scale_width", name="line")
+layout = column(p, sizing_mode="scale_width", name="line")
 
 curdoc().add_root(layout)
+
+update_chart('tok','XSGD','XSGD')
     
+# Streaming
+#for x in ohlcdb['xsgd'].find().sort('_id'):
+#    del x['_id']
+#    source.stream(x, 4000)
+
+
 
 ###########################
 ###    Dropdown Menu   ####
@@ -153,6 +128,23 @@ curdoc().add_root(dropdown)
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zillog"]
 
+
+_liq = {"gzil" : [], 
+        "xsgd" : [], 
+        "bolt" : [], 
+        "zlp"  : []}
+
+_rate = {"gzil" : [], 
+         "xsgd" : [], 
+         "bolt" : [], 
+         "zlp"  : []}
+
+for tok in tokens:
+    mongodb[tok]
+    for x in mongodb[tok].find().sort('_id'):
+        _liq[tok].append(x['liq_zil'])
+        _rate[tok].append(x['rate'])
+        
 pie_dict = {}
 for tok in tokens:
     pie_dict[tok.upper()] = int(_liq[tok][-1])

@@ -52,7 +52,8 @@ class zilswap:
                       "zyf"   : self.zyf,
                       "sergs" : self.sergs}
         
-        self.decimals = {"gzil"  : 15,
+        self.decimals = {"zil"   : 12,
+                         "gzil"  : 15,
                          "xsgd"  : 6,
                          "bolt"  : 18,
                          "zlp"   : 18,
