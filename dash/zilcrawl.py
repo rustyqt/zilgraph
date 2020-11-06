@@ -55,7 +55,12 @@ class zilcrawl:
                        "gzil"  : self.mongodb["ohlc_1h_gzil"], 
                        "bolt"  : self.mongodb["ohlc_1h_bolt"], 
                        "zlp"   : self.mongodb["ohlc_1h_zlp"]}
-                
+        
+        self.ohlcdb_24h = {"xsgd"  : self.mongodb["ohlc_24h_xsgd"], 
+                           "gzil"  : self.mongodb["ohlc_24h_gzil"], 
+                           "bolt"  : self.mongodb["ohlc_24h_bolt"], 
+                           "zlp"   : self.mongodb["ohlc_24h_zlp"]}
+        
         self.decimals = {"zil"   : 12,
                          "gzil"  : 15,
                          "xsgd"  : 6,
@@ -166,6 +171,8 @@ class zilcrawl:
                 pass
     
     def ohlc(self):
+        self.clean("ohlcdb")
+        
         arr_1h = {}
         for tok in self.tokendb:        
             for x in self.tokendb[tok].find().sort('_id'):
@@ -178,7 +185,20 @@ class zilcrawl:
                 else:
                     arr_1h[tok] = {}
                     arr_1h[tok][h] = [x['rate']]
-
+        
+        arr_24h = {}
+        for tok in self.tokendb:        
+            for x in self.tokendb[tok].find().sort('_id'):
+                d = int(x['_id']/(3600*24))
+                if tok in arr_24h:
+                    if d in arr_24h[tok]:
+                        arr_24h[tok][d].append(x['rate'])
+                    else:
+                        arr_24h[tok][d] = [x['rate']]
+                else:
+                    arr_24h[tok] = {}
+                    arr_24h[tok][d] = [x['rate']]
+                    
         # OHLC
         for tok in arr_1h:
             for h in arr_1h[tok]:
@@ -203,7 +223,30 @@ class zilcrawl:
                 except:
                     print("Oooops..")
                     pass
-        
+                
+        for tok in arr_24h:
+            for d in arr_24h[tok]:
+                op = arr_24h[tok][d][0]
+                hi = max(arr_24h[tok][d])
+                lo = min(arr_24h[tok][d])
+                cl = arr_24h[tok][d][-1]
+                av = sum(arr_24h[tok][d]) / len(arr_24h[tok][d])
+                color = "green" if op < cl else "red"
+                
+                new_entry = {"_id"     : d,
+                             "time"    : [d*3600*24*1000],
+                             "open"    : [op],
+                             "high"    : [hi],
+                             "low"     : [lo],
+                             "close"   : [cl],
+                             "average" : [av],
+                             "color"   : [color]}
+                
+                try:
+                    self.ohlcdb_24h[tok].insert_one(new_entry)
+                except:
+                    #print("Oooops..")
+                    pass
         
         
     def clean(self, db):
@@ -214,12 +257,17 @@ class zilcrawl:
         if db == "ohlcdb":
             for tok in self.ohlcdb:
                 self.ohlcdb[tok].delete_many({})
+                
+            for tok in self.ohlcdb_24h:
+                self.ohlcdb_24h[tok].delete_many({})
             
     def mrproper(self):
         self.zilswap.delete_many({})
             
             
 crawler = zilcrawl()
+
+crawler.ohlc()
 
 while True:
     sec_to_next_hour = 3600 - int(time.time()) % 3600

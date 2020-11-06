@@ -50,9 +50,10 @@
                 <div class="col-md-4 col-sm-4 col-xs-4">
                 </div>
                 <div class="col-md-4 col-sm-4 col-xs-4">
+                  {{ embed(roots.dropdown_timebase) }}
                 </div>
                 <div class="col-md-4 col-sm-4 col-xs-4">
-                  {{ embed(roots.dropdown) }}
+                  {{ embed(roots.dropdown_token) }}
                 </div>
               </div>
               
@@ -90,13 +91,14 @@
       <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
         <center>
-          <h3>Objective</h3>
-          <p>Zildash is an open source tool for visualizing zilswap activity on the Zilliqa blockchain.</p>
-          <p>It's providing XSGD and GZIL charts.</p>
+          <h3>Zilgraph</h3>
+          <p>Zilgraph is an open source Zilswap Dashboard for visualizing zilswap activity on the Zilliqa blockchain.</p>
+          <p>It's providing XSGD and GZIL charts as well as charts from other viewblock verified tokens traded on Zilswap.</p>
           <p>The data is acquired from the zilswap smart contract and stored in a local MongoDB database.</p>
           <p>The Zilgraph front-end provides visualized data using bokeh python library.</p>
+          <p> Warning: Percentage change indicators are dummies only and do not refelect actual market data. Will be fixed soon.</p>
           <h3>Github</h3>
-          <a href="https://www.github.com/jsarcher/zilgraph">www.github.com/jsarcher/zilgraph</a>
+          <a href="https://www.github.com/jsarcher/zilgraph" target="_blank">www.github.com/jsarcher/zilgraph</a>
           <h3> </h3>
         </center>
         </div>

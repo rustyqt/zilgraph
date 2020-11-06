@@ -21,24 +21,31 @@ import pymongo
 
 
 tokens = ["gzil", "xsgd", "bolt", "zlp"]
-tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
 
-tok_upper_to_down = {"GZIL"  : "gzil", 
-                     "XSGD"  : "xsgd", 
-                     "BOLT"  : "bolt", 
-                     "ZLP"   : "zlp"}
-    
+timebase = ["1h", "24h"]
+timebase_options = ["Hourly - 1h", "Daily - 24h"]
+
+tb_dict = {timebase_options[0] : "1h",
+           timebase_options[1] : "24h"}
 
 ###########################
 ### Update Price Chart ####
 ###########################
 
-def update_chart(attrname, old, new):
-    tok = tok_upper_to_down[new]
-    
-    source.data.update(ohlc_1h[tok])
-    
-    
+class zilgraph:
+    def __init__(self):
+        self.g_tok = "xsgd"
+        self.g_timebase = timebase[1]
+        
+    def update_chart(self, attrname, old, new):
+        self.g_tok = new.lower()
+        source.data.update(ohlc[self.g_timebase][self.g_tok])
+            
+    def update_timebase(self, attrname, old, new):
+        self.g_timebase = tb_dict[new]
+        source.data.update(ohlc[self.g_timebase][self.g_tok])    
+
+        
 ###########################
 ###  Init Price Chart  ####
 ###########################
@@ -46,48 +53,50 @@ def update_chart(attrname, old, new):
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zilcrawl"]
 
-ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
-          "gzil"  : mongodb["ohlc_1h_gzil"], 
-          "bolt"  : mongodb["ohlc_1h_bolt"], 
-          "zlp"   : mongodb["ohlc_1h_zlp"]}
+ohlcdb_1h = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
+             "gzil"  : mongodb["ohlc_1h_gzil"], 
+             "bolt"  : mongodb["ohlc_1h_bolt"], 
+             "zlp"   : mongodb["ohlc_1h_zlp"]}
 
-ohlc_1h = {}
-for tok in tokens:
-    for x in ohlcdb[tok].find().sort('_id'):
-        if tok not in ohlc_1h:
-            ohlc_1h[tok] = {}
-            ohlc_1h[tok]['time']    = x['time']
-            ohlc_1h[tok]['open']    = x['open']
-            ohlc_1h[tok]['high']    = x['high']
-            ohlc_1h[tok]['low']     = x['low']
-            ohlc_1h[tok]['close']   = x['close']
-            ohlc_1h[tok]['average'] = x['average']
-            ohlc_1h[tok]['color']   = x['color']
+ohlcdb_24h = {"xsgd"  : mongodb["ohlc_24h_xsgd"], 
+              "gzil"  : mongodb["ohlc_24h_gzil"], 
+              "bolt"  : mongodb["ohlc_24h_bolt"], 
+              "zlp"   : mongodb["ohlc_24h_zlp"]}
+
+ohlcdb = {"1h" : ohlcdb_1h, "24h" : ohlcdb_24h}
+
+ohlc = { "1h" : {}, "24h" : {}}
+
+for tb in ohlcdb:
+    for tok in tokens:
+        for x in ohlcdb[tb][tok].find().sort('_id'):
+            if tok not in ohlc[tb]:
+                ohlc[tb][tok] = {}
+                ohlc[tb][tok]['time']    = x['time']
+                ohlc[tb][tok]['open']    = x['open']
+                ohlc[tb][tok]['high']    = x['high']
+                ohlc[tb][tok]['low']     = x['low']
+                ohlc[tb][tok]['close']   = x['close']
+                ohlc[tb][tok]['average'] = x['average']
+                ohlc[tb][tok]['color']   = x['color']
     
-        ohlc_1h[tok]['time'].append(x['time'][0])
-        ohlc_1h[tok]['open'].append(x['open'][0])
-        ohlc_1h[tok]['high'].append(x['high'][0])
-        ohlc_1h[tok]['low'].append(x['low'][0])
-        ohlc_1h[tok]['close'].append(x['close'][0])
-        ohlc_1h[tok]['average'].append(x['average'][0])
-        ohlc_1h[tok]['color'].append(x['color'][0])
+            ohlc[tb][tok]['time'].append(x['time'][0])
+            ohlc[tb][tok]['open'].append(x['open'][0])
+            ohlc[tb][tok]['high'].append(x['high'][0])
+            ohlc[tb][tok]['low'].append(x['low'][0])
+            ohlc[tb][tok]['close'].append(x['close'][0])
+            ohlc[tb][tok]['average'].append(x['average'][0])
+            ohlc[tb][tok]['color'].append(x['color'][0])
+            
         
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zilcrawl"]
-
-_tok = "xsgd"
-
-ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
-          "gzil"  : mongodb["ohlc_1h_gzil"], 
-          "bolt"  : mongodb["ohlc_1h_bolt"], 
-          "zlp"   : mongodb["ohlc_1h_zlp"]}
-
 
 source = ColumnDataSource(dict(time=[], average=[], low=[], high=[], open=[], close=[], color=[]))
 
 p = figure(plot_height=200, tools="pan,wheel_zoom,box_zoom,reset", x_axis_type="datetime", y_axis_location="right")
 p.x_range.follow = "end"
-p.x_range.follow_interval = 1000000000
+p.x_range.follow_interval = 10000000000
 p.x_range.range_padding = 0
 
 p.line(x='time', y='average', alpha=0.2, line_width=3, color='navy', source=source)
@@ -99,8 +108,9 @@ layout = column(p, sizing_mode="scale_width", name="line")
 
 curdoc().add_root(layout)
 
-update_chart('tok','XSGD','XSGD')
-    
+z = zilgraph()
+z.update_chart('tok', 'XSGD', 'XSGD')
+
 # Streaming
 #for x in ohlcdb['xsgd'].find().sort('_id'):
 #    del x['_id']
@@ -112,11 +122,20 @@ update_chart('tok','XSGD','XSGD')
 ###    Dropdown Menu   ####
 ###########################
 
+dropdown_timebase = Select(value=timebase_options[1], options=timebase_options, name="dropdown_timebase")
+dropdown_timebase.on_change('value', z.update_timebase)
 
-dropdown = Select(value="XSGD", options=tokens_upper, name="dropdown")
-dropdown.on_change('value', update_chart)
+tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
 
-curdoc().add_root(dropdown)
+tokens_upper = []
+for tok in tokens:
+    tokens_upper.append(tok.upper())
+
+dropdown_token = Select(value="XSGD", options=tokens_upper, name="dropdown_token")
+dropdown_token.on_change('value', z.update_chart)
+
+curdoc().add_root(dropdown_timebase)
+curdoc().add_root(dropdown_token)
 
 
 ###########################
@@ -183,10 +202,10 @@ table_dict = {}
 table_dict["tok"]  = []
 table_dict["rate"] = []
 table_dict["liq"]  = []
-for tok in tokens_upper:
-    table_dict["tok"].append(tok)
-    table_dict["rate"].append(round(_rate[tok_upper_to_down[tok]][-1],2))
-    table_dict["liq"].append(int(_liq[tok_upper_to_down[tok]][-1]))
+for tok in tokens:
+    table_dict["tok"].append(tok.upper())
+    table_dict["rate"].append(round(_rate[tok][-1],2))
+    table_dict["liq"].append(int(_liq[tok][-1]))
 
 
 pdsource = ColumnDataSource(data=pd.DataFrame(table_dict))
@@ -196,7 +215,7 @@ columns = [
     TableColumn(field="rate", title="Price [ZIL]",  formatter=StringFormatter(text_align="center")),
     TableColumn(field="liq", title="Liquitidy [ZIL]", formatter=NumberFormatter(text_align="center")),
 ]
-table = DataTable(source=pdsource, columns=columns, height=210, width=330, name="table", sizing_mode="scale_both")
+table = DataTable(source=pdsource, columns=columns, height=193, width=330, name="table", sizing_mode="scale_both")
 
 #layout = row(region, table)
 curdoc().add_root(region)
@@ -213,13 +232,19 @@ for tok in tokens:
     total_liq += _liq[tok][-1]
 
 
+# Calculate change
+total_liq_change = 0.01
+xsgd_liq_change = 0.01
+pairs_change = 0.0
+gzil_change = 0.01
+
 curdoc().title = "Zilgraph - A Zilswap Dashboard"
 curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']
 curdoc().template_variables['stats'] = {
-    'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  4   , 'label': 'Total Liquidity'},
-    'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  1.2 , 'label': 'XSGD Liquidity'},
-    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  0.0 , 'label': 'Verified Tokens'},
-    'sales'     : {'icon': 'dollar',      'value': str(int(_rate['gzil'][-1])) + " ZIL",  'change': -0.2 , 'label': 'gZIL Token Price'},
+    'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  total_liq_change   , 'label': 'Total Liquidity'},
+    'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  xsgd_liq_change , 'label': 'XSGD Liquidity'},
+    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  pairs_change , 'label': 'Verified Tokens'},
+    'sales'     : {'icon': 'dollar',      'value': str(int(_rate['gzil'][-1])) + " ZIL",  'change': gzil_change , 'label': 'gZIL Token Price'},
 }
 
 

@@ -12,8 +12,6 @@ from pyzil.contract import Contract
 import time
 
 
-
-
 class pyzilly:
 
   def get_contract(self, contract_addr):
