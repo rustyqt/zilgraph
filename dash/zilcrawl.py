@@ -22,7 +22,7 @@ from pyzil.contract import Contract
 
 class zilcrawl:
     def __init__(self):
-        
+
         # Setup GET request
         self.viewblock_zilswap_url = 'https://api.viewblock.io/v1/zilliqa/addresses/zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w/txs?page='
         self.viewblock_headers = { 'X-APIKEY': '724842b06be026a7d619bdbdec96b0e25e0174740a39b7502dafa74065dcefc4'}
@@ -31,47 +31,52 @@ class zilcrawl:
         # Configure MongoDB
         self.mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
         self.mongodb = self.mongoclient["zilcrawl"]
-        
+
         # Create database for zilswap contract
         self.zilswap = self.mongodb["zilswap"]
-        
+
         # Set Token accounts
         self.gzil  = Account(address="zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e")
         self.xsgd  = Account(address="zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t")
         self.bolt  = Account(address="zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0")
+        self.carb  = Account(address="zil1hau7z6rjltvjc95pphwj57umdpvv0d6kh2t8zk")
         self.zlp   = Account(address="zil1l0g8u6f9g0fsvjuu74ctyla2hltefrdyt7k5f4")
-        
+
         self.token = {"gzil"  : self.gzil,
                       "xsgd"  : self.xsgd,
                       "bolt"  : self.bolt,
+                      "carb"  : self.carb,
                       "zlp"   : self.zlp}
-        
-        self.tokendb = {"xsgd"  : self.mongodb["xsgd"], 
-                        "gzil"  : self.mongodb["gzil"], 
-                        "bolt"  : self.mongodb["bolt"], 
+
+        self.tokendb = {"xsgd"  : self.mongodb["xsgd"],
+                        "gzil"  : self.mongodb["gzil"],
+                        "bolt"  : self.mongodb["bolt"],
+                        "carb"  : self.mongodb["carb"],
                         "zlp"   : self.mongodb["zlp"]}
 
-        self.ohlcdb = {"xsgd"  : self.mongodb["ohlc_1h_xsgd"], 
-                       "gzil"  : self.mongodb["ohlc_1h_gzil"], 
-                       "bolt"  : self.mongodb["ohlc_1h_bolt"], 
+        self.ohlcdb = {"xsgd"  : self.mongodb["ohlc_1h_xsgd"],
+                       "gzil"  : self.mongodb["ohlc_1h_gzil"],
+                       "bolt"  : self.mongodb["ohlc_1h_bolt"],
+                       "carb"  : self.mongodb["ohlc_1h_carb"],
                        "zlp"   : self.mongodb["ohlc_1h_zlp"]}
-                
+
         self.decimals = {"zil"   : 12,
                          "gzil"  : 15,
                          "xsgd"  : 6,
                          "bolt"  : 18,
+                         "carb"  : 8,
                          "zlp"   : 18}
-        
-        
+
+
         self.trade_cnt = {"gzil"  : 0,
                           "xsgd"  : 0,
                           "bolt"  : 0,
                           "zlp"   : 0}
 
-        
+
     def run(self, debug=False):
-        
-        
+
+
         viewblock_page = []
 
         for page in range(1,50):
@@ -80,19 +85,19 @@ class zilcrawl:
                 viewblock_page = json.loads(r.content.decode('utf-8'))
             except:
                 print("Viewblock: GET Request failed")
-        
+
             for entry in viewblock_page:
                 entry['_id'] = entry['hash']
                 try:
                     self.zilswap.insert_one(entry)
                 except:
                     print("MongoDB: Insert one failed")
-                
+
                 # Print entry info
                 date_time = datetime.fromtimestamp(int(entry['timestamp']/1000))
                 print("Datetime: " + date_time.strftime("%Y-%m-%d %H:%M:%S"))
                 print(entry['_id'])
-                
+
             # Max 3 GET requests per second
             time.sleep(0.5)
 
@@ -108,14 +113,14 @@ class zilcrawl:
                         self.analyze_swap(entry)
                     if data['_tag'] == "SwapZILForExactTokens":
                         cnt_exact_token+=1
-                        
-                    
+
+
         print("ExactZIL: " + str(cnt_exact_zil))
         print("ExactToken: " + str(cnt_exact_token))
-        
+
         pprint(self.trade_cnt)
-        
-        
+
+
     def analyze_swap(self, entry):
         _timestamp = int(entry['timestamp']/1000)
         date_time = datetime.fromtimestamp(_timestamp)
@@ -123,11 +128,11 @@ class zilcrawl:
         print(entry['_id'])
         #data = json.loads(entry['data'])
         #print(data['_tag'])
-        
+
         _tok = None
         _success = 0
         try:
-                
+
             for e in entry['events']:
                 if e['name'] == "Swapped":
                     pool = e['params']['pool']
@@ -135,9 +140,9 @@ class zilcrawl:
                         if pool == self.token[tok].address0x:
                             self.trade_cnt[tok]+=1
                             _tok = tok
-                            
+
                 if e['name'] == "TransferSuccess":
-                    
+
                     _amount = e['params']['amount']
                     _success = 1
 
@@ -148,14 +153,14 @@ class zilcrawl:
             _tok_amount = int(_amount)*pow(10,-self.decimals[_tok])
             _zil_amount = int(entry['value'])*pow(10,-self.decimals['zil'])
             _rate = _zil_amount / _tok_amount
-            
+
             print("Rate " + _tok + ": " + str(_rate))
-            
+
             new_entry = {"_id": _timestamp,
                          "rate": _rate,
                          "liq_zil": 1000000,
                          "liq_"+_tok: 1000}
-            
+
             print(new_entry)
             print(_tok)
             try:
@@ -164,10 +169,10 @@ class zilcrawl:
                 print("MongoDB: Insert one failed")
                 print(error)
                 pass
-    
+
     def ohlc(self):
         arr_1h = {}
-        for tok in self.tokendb:        
+        for tok in self.tokendb:
             for x in self.tokendb[tok].find().sort('_id'):
                 h = int(x['_id']/3600)
                 if tok in arr_1h:
@@ -188,7 +193,7 @@ class zilcrawl:
                 cl = arr_1h[tok][h][-1]
                 av = sum(arr_1h[tok][h]) / len(arr_1h[tok][h])
                 color = "green" if op < cl else "red"
-                
+
                 new_entry = {"_id"     : h,
                              "time"    : [h*3600*1000],
                              "open"    : [op],
@@ -197,28 +202,28 @@ class zilcrawl:
                              "close"   : [cl],
                              "average" : [av],
                              "color"   : [color]}
-                
+
                 try:
                     self.ohlcdb[tok].insert_one(new_entry)
                 except:
                     print("Oooops..")
                     pass
-        
-        
-        
+
+
+
     def clean(self, db):
         if db == "tokendb":
             for tok in self.tokendb:
                 self.tokendb[tok].delete_many({})
-        
+
         if db == "ohlcdb":
             for tok in self.ohlcdb:
                 self.ohlcdb[tok].delete_many({})
-            
+
     def mrproper(self):
         self.zilswap.delete_many({})
-            
-            
+
+
 crawler = zilcrawl()
 
 while True:
@@ -230,11 +235,8 @@ while True:
         crawler.analyze()
         crawler.ohlc()
         time.sleep(60)
-        
+
     time.sleep(1)
 
 #crawler.clean("ohlcdb")
 #crawler.mrproper()
-
-
-

@@ -20,14 +20,15 @@ from datetime import datetime
 import pymongo
 
 
-tokens = ["gzil", "xsgd", "bolt", "zlp"]
-tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
+tokens = ["gzil", "xsgd", "bolt", "carb", "zlp"]
+tokens_upper = ["GZIL", "XSGD", "BOLT", "CARB" "ZLP"]
 
-tok_upper_to_down = {"GZIL"  : "gzil", 
-                     "XSGD"  : "xsgd", 
-                     "BOLT"  : "bolt", 
+tok_upper_to_down = {"GZIL"  : "gzil",
+                     "XSGD"  : "xsgd",
+                     "BOLT"  : "bolt",
+                     "CARB"  : "carb",
                      "ZLP"   : "zlp"}
-    
+
 
 ###########################
 ### Update Price Chart ####
@@ -35,10 +36,10 @@ tok_upper_to_down = {"GZIL"  : "gzil",
 
 def update_chart(attrname, old, new):
     tok = tok_upper_to_down[new]
-    
+
     source.data.update(ohlc_1h[tok])
-    
-    
+
+
 ###########################
 ###  Init Price Chart  ####
 ###########################
@@ -46,9 +47,10 @@ def update_chart(attrname, old, new):
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zilcrawl"]
 
-ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
-          "gzil"  : mongodb["ohlc_1h_gzil"], 
-          "bolt"  : mongodb["ohlc_1h_bolt"], 
+ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"],
+          "gzil"  : mongodb["ohlc_1h_gzil"],
+          "bolt"  : mongodb["ohlc_1h_bolt"],
+          "carb"  : mongodb["ohlc_1h_carb"],
           "zlp"   : mongodb["ohlc_1h_zlp"]}
 
 ohlc_1h = {}
@@ -63,7 +65,7 @@ for tok in tokens:
             ohlc_1h[tok]['close']   = x['close']
             ohlc_1h[tok]['average'] = x['average']
             ohlc_1h[tok]['color']   = x['color']
-    
+
         ohlc_1h[tok]['time'].append(x['time'][0])
         ohlc_1h[tok]['open'].append(x['open'][0])
         ohlc_1h[tok]['high'].append(x['high'][0])
@@ -71,15 +73,16 @@ for tok in tokens:
         ohlc_1h[tok]['close'].append(x['close'][0])
         ohlc_1h[tok]['average'].append(x['average'][0])
         ohlc_1h[tok]['color'].append(x['color'][0])
-        
+
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zilcrawl"]
 
 _tok = "xsgd"
 
-ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
-          "gzil"  : mongodb["ohlc_1h_gzil"], 
-          "bolt"  : mongodb["ohlc_1h_bolt"], 
+ohlcdb = {"xsgd"  : mongodb["ohlc_1h_xsgd"],
+          "gzil"  : mongodb["ohlc_1h_gzil"],
+          "bolt"  : mongodb["ohlc_1h_bolt"],
+          "carb"  : mongodb["ohlc_1h_carb"],
           "zlp"   : mongodb["ohlc_1h_zlp"]}
 
 
@@ -100,7 +103,7 @@ layout = column(p, sizing_mode="scale_width", name="line")
 curdoc().add_root(layout)
 
 update_chart('tok','XSGD','XSGD')
-    
+
 # Streaming
 #for x in ohlcdb['xsgd'].find().sort('_id'):
 #    del x['_id']
@@ -129,14 +132,16 @@ mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zillog"]
 
 
-_liq = {"gzil" : [], 
-        "xsgd" : [], 
-        "bolt" : [], 
+_liq = {"gzil" : [],
+        "xsgd" : [],
+        "bolt" : [],
+        "carb" : [],
         "zlp"  : []}
 
-_rate = {"gzil" : [], 
-         "xsgd" : [], 
-         "bolt" : [], 
+_rate = {"gzil" : [],
+         "xsgd" : [],
+         "bolt" : [],
+         "carb" : [],
          "zlp"  : []}
 
 for tok in tokens:
@@ -144,7 +149,7 @@ for tok in tokens:
     for x in mongodb[tok].find().sort('_id'):
         _liq[tok].append(x['liq_zil'])
         _rate[tok].append(x['rate'])
-        
+
 pie_dict = {}
 for tok in tokens:
     pie_dict[tok.upper()] = int(_liq[tok][-1])
@@ -221,24 +226,3 @@ curdoc().template_variables['stats'] = {
     'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  0.0 , 'label': 'Verified Tokens'},
     'sales'     : {'icon': 'dollar',      'value': str(int(_rate['gzil'][-1])) + " ZIL",  'change': -0.2 , 'label': 'gZIL Token Price'},
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
