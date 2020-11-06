@@ -79,7 +79,7 @@ class zilcrawl:
         
         viewblock_page = []
 
-        for page in range(1,50):
+        for page in range(1,20):
             try:
                 r = requests.get(self.viewblock_zilswap_url + str(page), headers=self.viewblock_headers)
                 viewblock_page = json.loads(r.content.decode('utf-8'))
