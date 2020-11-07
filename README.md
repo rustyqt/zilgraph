@@ -21,8 +21,8 @@ Once obtained, the API-KEY need to be stored in your home folder in ~/.viewblock
 
     {
         "X-APIKEY": {
-            "key"    : "724842b06be026a7d619bdbdec96b0e25e0174740a39b7502dafa74065dcefc4",
-            "secret" : "9ed79dd79c57b2464e6e3ed8aeac4a432d5935f41a2db40223b1a58091874812"
+            "key"    : "<key_string>",
+            "secret" : "<secret_string>"
         }
     }
 
