@@ -39,7 +39,7 @@ For development purpose you can use the bokeh server to launch the website at ht
     ~/zilgraph$ bokeh serve --dev --show dash
 
 
-Doployment in the production environment is recommended using an nginx reverse proxy in front of the bokeh server. Start the bokeh server for zilgraph production environment with:
+For deployment in the production environment it is recommended using an nginx reverse proxy in front of the bokeh server. Start the bokeh server for zilgraph production environment with:
 
     ~/zilgraph$ bokeh serve --show dash --allow-websocket-origin="zilgraph.ddns.net"
 
