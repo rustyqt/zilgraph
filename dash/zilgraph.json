@@ -1,0 +1,59 @@
+{
+    "tokens" : {
+        "gzil"  : {
+            "addr"     : "zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e",
+            "decimals" : 15,
+            "verified" : true
+        },
+        "xsgd"  : {
+            "addr"     : "zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t",
+            "decimals" : 6,
+            "verified" : true
+        },
+        "bolt"  : {
+            "addr" : "zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0",
+            "decimals" : 18,
+            "verified" : true
+        },
+        "zlp"   : {
+            "addr" : "zil1l0g8u6f9g0fsvjuu74ctyla2hltefrdyt7k5f4",
+            "decimals" : 18,
+            "verified" : true
+        },
+        "zyf"   : {
+            "addr" : "zil1arrjugcg28rw8g9zxpa6qffc6wekpwk2alu7kj",
+            "decimals" : 3,
+            "verified" : false
+        },
+        "sergs" : {
+            "addr" : "zil1ztmv5jhfpnxu95ts9ylup7hj73n5ka744jm4ea",
+            "decimals" : 5,
+            "verified" : false
+        },
+        "shrk" : {
+            "addr"     : "zil17tsmlqgnzlfxsq4evm6n26txm2xlp5hele0kew",
+            "decimals" : 6,
+            "verified" : false
+        },
+        "carb" : {
+            "addr"     : "zil1hau7z6rjltvjc95pphwj57umdpvv0d6kh2t8zk",
+            "decimals" : 8,
+            "verified" : false
+        },
+        "zlf" : {
+            "addr"     : "zil1r9dcsrya4ynuxnzaznu00e6hh3kpt7vhvzgva0",
+            "decimals" : 5,
+            "verified" : false
+        },
+        "redc" : {
+            "addr"     : "zil1a5wkhunysdp9x0nww5qe6m2m8x2m3ygdpuu257",
+            "decimals" : 2,
+            "verified" : false
+        }
+    },
+    
+    "conf" : {
+        "X-APIKEY": "724842b06be026a7d619bdbdec96b0e25e0174740a39b7502dafa74065dcefc4"
+    }
+
+}

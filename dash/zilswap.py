@@ -10,9 +10,7 @@ from pyzil.account import Account
 from pyzil.contract import Contract
 
 import time
-
-
-
+import json
 
 class pyzilly:
 
@@ -37,20 +35,21 @@ class zilswap:
         # Set Zilliqa API
         self.api = ZilliqaAPI("https://api.zilliqa.com/")
         
+
         # Set Token accounts
         self.gzil  = Account(address="zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e")
         self.xsgd  = Account(address="zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t")
         self.bolt  = Account(address="zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0")
         self.zyf   = Account(address="zil1arrjugcg28rw8g9zxpa6qffc6wekpwk2alu7kj")
         self.zlp   = Account(address="zil1l0g8u6f9g0fsvjuu74ctyla2hltefrdyt7k5f4")
-        self.shrk  = Account(address= "zil17tsmlqgnzlfxsq4evm6n26txm2xlp5hele0kew")
+        self.shrk  = Account(address="zil17tsmlqgnzlfxsq4evm6n26txm2xlp5hele0kew")
         
         self.token = {"gzil"  : self.gzil,
                       "xsgd"  : self.xsgd,
                       "bolt"  : self.bolt,
                       "zlp"   : self.zlp,
                       "zyf"   : self.zyf,
-                      “shrk” : self.shrk}
+                      "shrk" : self.shrk}
         
         self.decimals = {"gzil"  : 15,
                          "xsgd"  : 6,
@@ -58,7 +57,20 @@ class zilswap:
                          "zlp"   : 18,
                          "zyf"   : 3,
                          "shrk” : 6}
+=======
         
+        # Load Zilgraph JSON 
+        fp_json = open("zilgraph.json")
+        self.tokens = json.load(fp_json)["tokens"]
+        
+        # Setup dictionaries
+        self.token = {}
+        self.decimals = {"zil" : 12}
+        for tok in self.tokens:
+            self.token[tok]      = Account(address=self.tokens[tok]["addr"])
+            self.decimals[tok]   = self.tokens[tok]["decimals"]
+
+    
     def get_contract(self):
         self.contract.get_state()
         pprint(self.contract.state)
@@ -68,7 +80,7 @@ class zilswap:
         return balance
     
     def gzil_balance(self):
-        gzil_contract = Contract.load_from_address(self.gzil.bech32_address, load_state=True)
+        gzil_contract = Contract.load_from_address(self.token["gzil"].bech32_address, load_state=True)
         balance = float(gzil_contract.state['balances'][self.contract.account.address0x])*1e-15
         return balance
     
@@ -77,7 +89,7 @@ class zilswap:
         _min_token_amount = str(int(amount*1e15))
         _deadline_block = str(int(self.api.GetCurrentMiniEpoch())+15)
         
-        _params = [Contract.value_dict("token_address", "ByStr20", self.gzil.address0x),
+        _params = [Contract.value_dict("token_address", "ByStr20", self.token["gzil"].address0x),
                    Contract.value_dict("min_token_amount", "Uint128", _min_token_amount),
                    Contract.value_dict("deadline_block", "BNum", _deadline_block),
                    Contract.value_dict("recipient_address", "ByStr20", self.contract.account.address0x)]
@@ -97,7 +109,7 @@ class zilswap:
         
         _min_zil_amount = str(int(min_price*amount*1e12))
         
-        _params = [Contract.value_dict("token_address", "ByStr20", self.gzil.address0x),
+        _params = [Contract.value_dict("token_address", "ByStr20", self.token["gzil"].address0x),
                    Contract.value_dict("token_amount", "Uint128", _token_amount),
                    Contract.value_dict("min_zil_amount", "Uint128", _min_zil_amount),
                    Contract.value_dict("deadline_block", "BNum", _deadline_block),
@@ -111,14 +123,14 @@ class zilswap:
 
     def get_gzil_rate(self):
         self.contract.get_state()
-        _poolsize = self.contract.state['pools'][self.gzil.address0x]['arguments']
+        _poolsize = self.contract.state['pools'][self.token["gzil"].address0x]['arguments']
         _rate = (int(_poolsize[0])*1e-12) / (int(_poolsize[1])*1e-15)
         return _rate
 
 
     def get_gzil_market(self):
         self.contract.get_state()
-        _poolsize = self.contract.state['pools'][self.gzil.address0x]['arguments']
+        _poolsize = self.contract.state['pools'][self.token["gzil"].address0x]['arguments']
         
         _liq_zil = (int(_poolsize[0])*1e-12)
         _liq_gzil = (int(_poolsize[1])*1e-15)
