@@ -102,7 +102,6 @@ p.x_range.follow_interval = 10000000000
 p.x_range.range_padding = 0
 
 p.line(x='time', y='average', alpha=0.2, line_width=3, color='navy', source=source)
-p.line(x='time', y='ma', alpha=0.8, line_width=2, color='orange', source=source)
 p.segment(x0='time', y0='low', x1='time', y1='high', line_width=2, color='black', source=source)
 p.segment(x0='time', y0='open', x1='time', y1='close', line_width=8, color='color', source=source)
 
