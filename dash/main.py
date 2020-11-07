@@ -8,7 +8,7 @@ from bokeh.io import curdoc
 from bokeh.layouts import column, gridplot, row
 from bokeh.models import (ColumnDataSource, DataTable, NumberFormatter,
                           RangeTool, StringFormatter, TableColumn, HoverTool, Select, Slider, Div)
-from bokeh.palettes import Spectral4
+from bokeh.palettes import Spectral
 from bokeh.plotting import figure
 from bokeh.transform import cumsum
 
@@ -20,13 +20,7 @@ from datetime import datetime
 import pymongo
 
 
-tokens = ["gzil", "xsgd", "bolt", "zlp"]
 
-timebase = ["1h", "24h"]
-timebase_options = ["Hourly - 1h", "Daily - 24h"]
-
-tb_dict = {timebase_options[0] : "1h",
-           timebase_options[1] : "24h"}
 
 ###########################
 ### Update Price Chart ####
@@ -38,7 +32,7 @@ class zilgraph:
         self.g_timebase = timebase[1]
         
     def update_chart(self, attrname, old, new):
-        self.g_tok = new.lower()
+        self.g_tok = new.split()[-1].lower()
         source.data.update(ohlc[self.g_timebase][self.g_tok])
             
     def update_timebase(self, attrname, old, new):
@@ -53,15 +47,23 @@ class zilgraph:
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zilcrawl"]
 
-ohlcdb_1h = {"xsgd"  : mongodb["ohlc_1h_xsgd"], 
-             "gzil"  : mongodb["ohlc_1h_gzil"], 
-             "bolt"  : mongodb["ohlc_1h_bolt"], 
-             "zlp"   : mongodb["ohlc_1h_zlp"]}
+# Load Zilgraph JSON 
+fp_json = open("dash/zilgraph.json")
+tokens = json.load(fp_json)["tokens"]
 
-ohlcdb_24h = {"xsgd"  : mongodb["ohlc_24h_xsgd"], 
-              "gzil"  : mongodb["ohlc_24h_gzil"], 
-              "bolt"  : mongodb["ohlc_24h_bolt"], 
-              "zlp"   : mongodb["ohlc_24h_zlp"]}
+# Setup dictionaries
+ohlcdb_1h = {}
+ohlcdb_24h = {}
+for tok in tokens:
+    ohlcdb_1h[tok]  = mongodb["ohlc_1h_" + tok]
+    ohlcdb_24h[tok] = mongodb["ohlc_24h_" + tok]
+
+timebase = ["1h", "24h"]
+timebase_options = ["Hourly - 1h", "Daily - 24h"]
+
+tb_dict = {timebase_options[0] : "1h",
+           timebase_options[1] : "24h"}
+
 
 ohlcdb = {"1h" : ohlcdb_1h, "24h" : ohlcdb_24h}
 
@@ -122,16 +124,19 @@ z.update_chart('tok', 'XSGD', 'XSGD')
 ###    Dropdown Menu   ####
 ###########################
 
-dropdown_timebase = Select(value=timebase_options[1], options=timebase_options, name="dropdown_timebase")
+dropdown_timebase = Select(value=timebase_options[1], options=timebase_options, name="dropdown_timebase", max_width=150)
 dropdown_timebase.on_change('value', z.update_timebase)
-
-tokens_upper = ["GZIL", "XSGD", "BOLT", "ZLP"]
 
 tokens_upper = []
 for tok in tokens:
-    tokens_upper.append(tok.upper())
+    if tokens[tok]["verified"]:
+        tokens_upper.append("✓ " + tok.upper())
+    else:
+        tokens_upper.append(tok.upper())
 
-dropdown_token = Select(value="XSGD", options=tokens_upper, name="dropdown_token")
+# UTF-8 Star: ★
+
+dropdown_token = Select(value="✓ XSGD", options=tokens_upper, name="dropdown_token", max_width=150)
 dropdown_token.on_change('value', z.update_chart)
 
 curdoc().add_root(dropdown_timebase)
@@ -147,19 +152,14 @@ curdoc().add_root(dropdown_token)
 mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zillog"]
 
-
-_liq = {"gzil" : [], 
-        "xsgd" : [], 
-        "bolt" : [], 
-        "zlp"  : []}
-
-_rate = {"gzil" : [], 
-         "xsgd" : [], 
-         "bolt" : [], 
-         "zlp"  : []}
-
+# Legacy dictionaries (to be replaced)
+_liq = {}
+_rate = {}
 for tok in tokens:
-    mongodb[tok]
+    _liq[tok] = []
+    _rate[tok] = []
+    
+for tok in tokens:
     for x in mongodb[tok].find().sort('_id'):
         _liq[tok].append(x['liq_zil'])
         _rate[tok].append(x['rate'])
@@ -171,10 +171,11 @@ for tok in tokens:
 print(pie_dict)
 
 x = Counter(pie_dict)
+total_liq = sum(x.values())
 
 data = pd.DataFrame.from_dict(dict(x), orient='index').reset_index().rename(index=str, columns={0:'value', 'index':'token'})
-data['angle'] = data['value']/sum(x.values()) * 2*pi
-data['color'] = Spectral4
+data['angle'] = data['value']/total_liq * 2*pi
+data['color'] = Spectral[len(tokens)]
 
 region = figure(plot_height=350, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
 
@@ -185,10 +186,10 @@ region.annular_wedge(x=-0, y=1, inner_radius=0.2, outer_radius=0.32,
 region.axis.axis_label=None
 region.axis.visible=False
 region.grid.grid_line_color = None
-region.legend.label_text_font_size = "1.7em"
+region.legend.label_text_font_size = "1.5em"
 region.legend.spacing = 5
-region.legend.glyph_height = 25
-region.legend.label_height = 25
+region.legend.glyph_height = 20
+region.legend.label_height = 20
 
 # configure so that no drag tools are active
 region.toolbar.active_drag = None
@@ -227,27 +228,28 @@ curdoc().add_root(table)
 ###########################
 
 
-total_liq = 0.0
-for tok in tokens:
-    total_liq += _liq[tok][-1]
-
-
 # Calculate change
 total_liq_change = 0.01
 xsgd_liq_change = 0.01
-pairs_change = 0.0
-gzil_change = 0.01
+pairs_change = 150.0
+
+#ohlc["24h"]['gzil']['time'][-1]
+#ohlc["24h"]['gzil']['close'][-1]
+gzil_rate = ohlc["24h"]['gzil']['close'][-1]
+gzil_rate_1wk = ohlc["24h"]['gzil']['close'][-8]
+
+gzil_change = round((gzil_rate / gzil_rate_1wk - 1)*100, 2)
 
 curdoc().title = "Zilgraph - A Zilswap Dashboard"
 curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']
 curdoc().template_variables['stats'] = {
     'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  total_liq_change   , 'label': 'Total Liquidity'},
     'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  xsgd_liq_change , 'label': 'XSGD Liquidity'},
-    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  pairs_change , 'label': 'Verified Tokens'},
-    'sales'     : {'icon': 'dollar',      'value': str(int(_rate['gzil'][-1])) + " ZIL",  'change': gzil_change , 'label': 'gZIL Token Price'},
+    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  pairs_change , 'label': 'Tokens'},
+    'sales'     : {'icon': 'dollar',      'value': str(int(gzil_rate)) + " ZIL",  'change': gzil_change , 'label': 'gZIL Token Price'},
 }
 
-
+#_rate['gzil'][-1])
 
 
 

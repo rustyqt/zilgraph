@@ -10,23 +10,37 @@ import requests
 import json
 import pymongo
 import time
+import sys
 from datetime import datetime
 
 from pprint import pprint
 
-from pyzil.zilliqa import chain
-from pyzil.zilliqa.units import Zil
-from pyzil.zilliqa.api import ZilliqaAPI
 from pyzil.account import Account
-from pyzil.contract import Contract
+
+from zillog import zillog
+
+from pathlib import Path
+
 
 class zilcrawl:
     def __init__(self):
         
-        # Setup GET request
         self.viewblock_zilswap_url = 'https://api.viewblock.io/v1/zilliqa/addresses/zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w/txs?page='
-        self.viewblock_headers = { 'X-APIKEY': '724842b06be026a7d619bdbdec96b0e25e0174740a39b7502dafa74065dcefc4'}
-
+        try:
+            fp_viewblock_api = open(str(Path.home()) + "/.viewblock.json")
+        except:
+            print("Failed to connect to Viewblock API")
+            print("A ~/.viewblock.json file is required in your home directory with the format:")
+            print("{")
+            print("  \"X-APIKEY\": {")
+            print("    \"key\"    : \"<key_string>\",")
+            print("    \"secret\" : \"<secret_string>\"")
+            print("  }")
+            print("}")
+            sys.exit()
+        
+        apikey = json.load(fp_viewblock_api)["X-APIKEY"]
+        self.viewblock_headers = { 'X-APIKEY': apikey["key"]}
 
         # Configure MongoDB
         self.mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -35,51 +49,32 @@ class zilcrawl:
         # Create database for zilswap contract
         self.zilswap = self.mongodb["zilswap"]
         
-        # Set Token accounts
-        self.gzil  = Account(address="zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e")
-        self.xsgd  = Account(address="zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t")
-        self.bolt  = Account(address="zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0")
-        self.zlp   = Account(address="zil1l0g8u6f9g0fsvjuu74ctyla2hltefrdyt7k5f4")
+        # Load Zilgraph JSON 
+        fp_json = open("zilgraph.json")
+        self.tokens = json.load(fp_json)["tokens"]
         
-        self.token = {"gzil"  : self.gzil,
-                      "xsgd"  : self.xsgd,
-                      "bolt"  : self.bolt,
-                      "zlp"   : self.zlp}
-        
-        self.tokendb = {"xsgd"  : self.mongodb["xsgd"], 
-                        "gzil"  : self.mongodb["gzil"], 
-                        "bolt"  : self.mongodb["bolt"], 
-                        "zlp"   : self.mongodb["zlp"]}
-
-        self.ohlcdb = {"xsgd"  : self.mongodb["ohlc_1h_xsgd"], 
-                       "gzil"  : self.mongodb["ohlc_1h_gzil"], 
-                       "bolt"  : self.mongodb["ohlc_1h_bolt"], 
-                       "zlp"   : self.mongodb["ohlc_1h_zlp"]}
-        
-        self.ohlcdb_24h = {"xsgd"  : self.mongodb["ohlc_24h_xsgd"], 
-                           "gzil"  : self.mongodb["ohlc_24h_gzil"], 
-                           "bolt"  : self.mongodb["ohlc_24h_bolt"], 
-                           "zlp"   : self.mongodb["ohlc_24h_zlp"]}
-        
-        self.decimals = {"zil"   : 12,
-                         "gzil"  : 15,
-                         "xsgd"  : 6,
-                         "bolt"  : 18,
-                         "zlp"   : 18}
-        
-        
-        self.trade_cnt = {"gzil"  : 0,
-                          "xsgd"  : 0,
-                          "bolt"  : 0,
-                          "zlp"   : 0}
-
-        
+        # Setup dictionaries
+        self.token = {}
+        self.tokendb = {}
+        self.ohlcdb_1h = {}
+        self.ohlcdb_24h = {}
+        self.decimals = {"zil" : 12}
+        self.trade_cnt = {}
+        for tok in self.tokens:
+            self.token[tok]      = Account(address=self.tokens[tok]["addr"])
+            self.tokendb[tok]    = self.mongodb[tok]
+            self.ohlcdb_1h[tok]  = self.mongodb["ohlc_1h_" + tok]
+            self.ohlcdb_24h[tok] = self.mongodb["ohlc_24h_" + tok]
+            self.decimals[tok]   = self.tokens[tok]["decimals"]
+            self.trade_cnt[tok]  = 0
+            
+    # Viewblock Crawler
     def run(self, debug=False):
         
         
         viewblock_page = []
 
-        for page in range(1,50):
+        for page in range(1,20):
             try:
                 r = requests.get(self.viewblock_zilswap_url + str(page), headers=self.viewblock_headers)
                 viewblock_page = json.loads(r.content.decode('utf-8'))
@@ -101,6 +96,7 @@ class zilcrawl:
             # Max 3 GET requests per second
             time.sleep(0.5)
 
+    # Viewblock Database Crawler
     def analyze(self, debug=False):
         cnt_exact_zil = 0
         cnt_exact_token = 0
@@ -170,6 +166,7 @@ class zilcrawl:
                 print(error)
                 pass
     
+    # Calc OHLC
     def ohlc(self):
         self.clean("ohlcdb")
         
@@ -219,7 +216,7 @@ class zilcrawl:
                              "color"   : [color]}
                 
                 try:
-                    self.ohlcdb[tok].insert_one(new_entry)
+                    self.ohlcdb_1h[tok].insert_one(new_entry)
                 except:
                     print("Oooops..")
                     pass
@@ -255,8 +252,8 @@ class zilcrawl:
                 self.tokendb[tok].delete_many({})
         
         if db == "ohlcdb":
-            for tok in self.ohlcdb:
-                self.ohlcdb[tok].delete_many({})
+            for tok in self.ohlcdb_1h:
+                self.ohlcdb_1h[tok].delete_many({})
                 
             for tok in self.ohlcdb_24h:
                 self.ohlcdb_24h[tok].delete_many({})
@@ -264,24 +261,33 @@ class zilcrawl:
     def mrproper(self):
         self.zilswap.delete_many({})
             
-            
-crawler = zilcrawl()
+# Instantiate Zillogger
+zl = zillog()
 
+crawler = zilcrawl()
+#crawler.run()
+crawler.analyze()
 crawler.ohlc()
 
 while True:
+    # Run Zillogger
+    zl.run()
+    
+    # Check time to next full hour
     sec_to_next_hour = 3600 - int(time.time()) % 3600
-
-    print(sec_to_next_hour)
+    print("Countdown: " + str(sec_to_next_hour))
+    
     if sec_to_next_hour < 60:
         crawler.run()
         crawler.analyze()
         crawler.ohlc()
-        time.sleep(60)
-        
-    time.sleep(1)
-
-#crawler.clean("ohlcdb")
+        time.sleep(50)
+    
+    # Sleep for 10 sec
+    time.sleep(10)
+    
+    
+    
 #crawler.mrproper()
 
 

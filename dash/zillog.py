@@ -7,7 +7,7 @@ from zilswap import zilswap
 import time
 
 import pymongo
-
+import json
 
     
 class zillog:
@@ -17,12 +17,14 @@ class zillog:
         self.mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
         self.mongodb = self.mongoclient["zillog"]
         
-        self.token = {"xsgd"  : self.mongodb["xsgd"], 
-                      "gzil"  : self.mongodb["gzil"], 
-                      "bolt"  : self.mongodb["bolt"], 
-                      "zlp"   : self.mongodb["zlp"],
-                      "zyf"   : self.mongodb["zyf"],
-                      "sergs" : self.mongodb["sergs"]}
+        # Load Zilgraph JSON 
+        fp_json = open("zilgraph.json")
+        self.tokens = json.load(fp_json)["tokens"]
+        
+        # Setup dictionaries
+        self.token = {}
+        for tok in self.tokens:
+            self.token[tok]      = self.mongodb[tok]
         
         # Wallet address
         addr = "zil1y7kr7nh28p5j3tv76jm5nkp2yq56j8xwsq5utr"
@@ -64,8 +66,3 @@ class zillog:
             self.token[tok].delete_many({})
             
             
-zl = zillog()
-
-#zl.mrproper()
-
-zl.rund()
