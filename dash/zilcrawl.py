@@ -265,7 +265,7 @@ class zilcrawl:
 zl = zillog()
 
 crawler = zilcrawl()
-#crawler.run()
+crawler.run()
 crawler.analyze()
 crawler.ohlc()
 
