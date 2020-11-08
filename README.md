@@ -61,3 +61,22 @@ For the nginx config one can use:
             proxy_buffering off;
         }
     }
+
+
+
+# Further Work
+
+Community contribution to the project is highly appreciated. If you like to contribute but don't know where to start you could go with one of the open points below.
+
+- [x] Zilswap Dashboard for XSGD, gZIL, BOLT, ZLP and others
+- [x] Daily and hourly OHLC charts for all tokens with historic data back to zilswap contract creation
+- [x] Current Liquidity distribution and total liquidity
+- [x] Current rates and liquidity of the tokens
+- [x] Basic zilswap python library (Get current market data, issue ExactZILforToken/TokenForExactZIL smart contract call)
+    
+- [ ] Make Zilgraph viewed better on mobile devices
+- [ ] Full-featured python zilswap library
+- [ ] Visualization of historic liquidity depth
+- [ ] Adding trading volume to price chart
+- [ ] Use local Zilliqa node as data provider for the Zilcrawler (Do we need a seed node for that?)
+- [ ] Visualization of other commonly used Zilliqa smart contracts (e.g. Staking Contract, Unstoppable Domains)
