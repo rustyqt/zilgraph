@@ -133,7 +133,7 @@ class zilcrawl:
                 if e['name'] == "Swapped":
                     pool = e['params']['pool']
                     for tok in self.token:
-                        if pool == self.token[tok].address0x:
+                        if pool == self.token[tok].address0x or pool == self.token[tok].bech32_address:
                             self.trade_cnt[tok]+=1
                             _tok = tok
                             
@@ -260,35 +260,7 @@ class zilcrawl:
             
     def mrproper(self):
         self.zilswap.delete_many({})
-            
-# Instantiate Zillogger
-zl = zillog()
-
-crawler = zilcrawl()
-crawler.run()
-crawler.analyze()
-crawler.ohlc()
-
-while True:
-    # Run Zillogger
-    zl.run()
-    
-    # Check time to next full hour
-    sec_to_next_hour = 3600 - int(time.time()) % 3600
-    print("Countdown: " + str(sec_to_next_hour))
-    
-    if sec_to_next_hour < 60:
-        crawler.run()
-        crawler.analyze()
-        crawler.ohlc()
-        time.sleep(50)
-    
-    # Sleep for 10 sec
-    time.sleep(10)
-    
-    
-    
-#crawler.mrproper()
+        
 
 
 
