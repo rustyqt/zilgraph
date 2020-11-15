@@ -43,17 +43,12 @@
         "zlf" : {
             "addr"     : "zil1r9dcsrya4ynuxnzaznu00e6hh3kpt7vhvzgva0",
             "decimals" : 5,
-            "verified" : false
+            "verified" : true
         },
         "redc" : {
             "addr"     : "zil1a5wkhunysdp9x0nww5qe6m2m8x2m3ygdpuu257",
             "decimals" : 2,
             "verified" : false
         }
-    },
-    
-    "conf" : {
-        "X-APIKEY": "724842b06be026a7d619bdbdec96b0e25e0174740a39b7502dafa74065dcefc4"
     }
-
 }
