@@ -2,7 +2,7 @@
 
 This first implementation of Zilgraph is a result of the XSGD hackathon. The architecture was designed in a rush for the Hackathon.
 
-![Zilgraph Legacy](doc/Zilgraph-Legacy.png)
+![Zilgraph Legacy](drawio/Zilgraph-Legacy.png)
 
 
 # Zilgraph - Architecture 2.0
@@ -14,10 +14,10 @@ In order to allow Zilgraph to scale to the go to place to get insights in all ki
 3. Data aggregators will do advanced queries to Elasticsearch and store aggregated data for quick access in MongoDBs.
 3. Zilgraph front end presents aggregated data in a visualized manner.
 
-![Zilgraph Legacy](doc/Zilgraph-Architecture.png)
+![Zilgraph Legacy](drawio/Zilgraph-Architecture.png)
 
 # Zilgraph Oracle
 
 The Zilgraph Oracle is an early stage idea. The idea is to provide aggregated data back to the Zilliqa blockchain using a Smart Contract Oracle.
 
-![Zilgraph Legacy](doc/Zilgraph-Oracle.png)
+![Zilgraph Legacy](drawio/Zilgraph-Oracle.png)
