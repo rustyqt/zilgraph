@@ -1,5 +1,5 @@
-<mxfile host="app.diagrams.net" modified="2020-12-10T20:42:44.158Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36" etag="lX296EqbR-j33fvuWrKa" version="14.0.0" type="github" pages="2">
-  <diagram id="eddRSXdbXzqdwhoQDh6k" name="Zilgraph 2.0">
+<mxfile host="app.diagrams.net" modified="2020-12-10T21:05:16.217Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36" etag="mVBAHZYmacKOBM0CnDjq" version="14.0.0" type="github" pages="3">
+  <diagram id="eddRSXdbXzqdwhoQDh6k" name="Architecture">
     <mxGraphModel dx="1478" dy="1112" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
@@ -62,25 +62,103 @@
         <mxCell id="wEiYYj2e1pjWQEtUVJ0r-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" parent="1" source="wEiYYj2e1pjWQEtUVJ0r-19" target="PppDZVDBbZMyRl5L9W1J-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wEiYYj2e1pjWQEtUVJ0r-19" value="MongoDB" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" parent="1" vertex="1">
+        <mxCell id="wEiYYj2e1pjWQEtUVJ0r-19" value="&lt;br&gt;MongoDB&lt;br&gt;( ... )" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" parent="1" vertex="1">
           <mxGeometry x="460" y="580" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="wEiYYj2e1pjWQEtUVJ0r-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="wEiYYj2e1pjWQEtUVJ0r-20" target="PppDZVDBbZMyRl5L9W1J-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wEiYYj2e1pjWQEtUVJ0r-20" value="MongoDB" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" parent="1" vertex="1">
+        <mxCell id="wEiYYj2e1pjWQEtUVJ0r-20" value="&lt;br&gt;MongoDB&lt;br&gt;(Staking)" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" parent="1" vertex="1">
           <mxGeometry x="340" y="580" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="wEiYYj2e1pjWQEtUVJ0r-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="wEiYYj2e1pjWQEtUVJ0r-21" target="PppDZVDBbZMyRl5L9W1J-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wEiYYj2e1pjWQEtUVJ0r-21" value="MongoDB" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" parent="1" vertex="1">
+        <mxCell id="wEiYYj2e1pjWQEtUVJ0r-21" value="&lt;br&gt;MongoDB&lt;br&gt;(Zilswap)" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" parent="1" vertex="1">
           <mxGeometry x="220" y="580" width="80" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="AWY5QDD9b8wqqQOVPNck" name="Legacy 1.0">
+  <diagram id="xFpYg9-6r4blVaEp7fx1" name="Oracle">
+    <mxGraphModel dx="1478" dy="1112" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="fk7lYJ2TNW3HxGZttcra-0" />
+        <mxCell id="fk7lYJ2TNW3HxGZttcra-1" parent="fk7lYJ2TNW3HxGZttcra-0" />
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-0" value="Local Seed Node" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="320" y="160" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-2" target="pvYoMhCMY7Y9h4lGXj3n-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-2" value="Zilliqa API" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="320" y="200" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-4" target="pvYoMhCMY7Y9h4lGXj3n-13">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-4" value="Zilcrawler" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="320" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-13" target="pvYoMhCMY7Y9h4lGXj3n-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="420" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-6" value="&lt;b&gt;Aggregators&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="200" y="470" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-8" target="pvYoMhCMY7Y9h4lGXj3n-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-8" value="Zilswap Contract Aggregator" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="200" y="510" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-10" target="pvYoMhCMY7Y9h4lGXj3n-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-10" value="Staking Contract Aggregator" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="320" y="510" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-12" target="pvYoMhCMY7Y9h4lGXj3n-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-12" value="..." style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="440" y="510" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-13" value="Elasticsearch" style="shape=datastore;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="330" y="320" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="qXhGYx1npJJCTmOOBILg-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-14" target="qXhGYx1npJJCTmOOBILg-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-14" value="&lt;br&gt;MongoDB&lt;br&gt;( ... )" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="460" y="580" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qXhGYx1npJJCTmOOBILg-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-15" target="qXhGYx1npJJCTmOOBILg-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-15" value="&lt;br&gt;MongoDB&lt;br&gt;(Staking)" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="340" y="580" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qXhGYx1npJJCTmOOBILg-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="fk7lYJ2TNW3HxGZttcra-1" source="pvYoMhCMY7Y9h4lGXj3n-16" target="qXhGYx1npJJCTmOOBILg-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pvYoMhCMY7Y9h4lGXj3n-16" value="&lt;br&gt;MongoDB&lt;br&gt;(Zilswap)" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="220" y="580" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qXhGYx1npJJCTmOOBILg-1" value="Zilgraph Oracle" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="200" y="720" width="360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="qXhGYx1npJJCTmOOBILg-5" value="Scilla Smart Contract:&lt;br&gt;&lt;ul&gt;&lt;li&gt;Zilswap Reward Estimation&lt;/li&gt;&lt;li&gt;Staking Reward Estimation&lt;/li&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;align=left;" vertex="1" parent="fk7lYJ2TNW3HxGZttcra-1">
+          <mxGeometry x="200" y="760" width="360" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="AWY5QDD9b8wqqQOVPNck" name="Legacy">
     <mxGraphModel dx="1478" dy="1112" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="eF5o-A4pd1vjj2XsfFBk-0" />
