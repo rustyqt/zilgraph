@@ -1,82 +1,23 @@
-# Zilgraph - A Zilswap Dashboard
-Zilgraph is an open source tool for visualizing Zilswap activity on the Zilliqa blockchain. It provides token OHLC charts - daily and hourly, liquitidy distribution and more.
+# Zilgraph - Legacy Architecture
 
-Zilgraph is launched here:  [Zilgraph](http://zilgraph.ddns.net)
+This first implementation of Zilgraph is a result of the XSGD hackathon. The architecture was designed in a rush for the Hackathon.
 
-The data is acquired from the zilswap smart contract and stored in a local MongoDB database.
-
-The Zilgraph front-end provides visualized data using bokeh python library.
-
-# Dependencies
-
-The Zilgraph depencies can be install using the following command:
-
-    pip3 install pyzil pymongo urllib3 requests pandas numpy bokeh
-
-# Zilcrawler
-
-The Zilcrawler is a crawler collecting and processing all the data required for the charts presented on Zilgraph. It is interfacing the zilswap smart contract through pyzil API as well as the viewblock API. For the latter we need an API-KEY which can be acquired from viewblock for free after registration. (see https://viewblock.io/api)
-
-Once obtained, the API-KEY need to be stored in your home folder in ~/.viewblock.json with the following format:
-
-    {
-        "X-APIKEY": {
-            "key"    : "<key_string>",
-            "secret" : "<secret_string>"
-        }
-    }
-
-Finally, you can start the crawler:
-
-    ~/zilgraph/dash$ python3 zilcrawl.py 
-
-# Start Dashboard
-
-The dashboard is described in *main.py* and makes use of the python bokeh library. The default deployment uses port 5006 on your localhost.
-
-For development purpose you can use the bokeh server to launch the website at http://localhost:5006
-
-    ~/zilgraph$ bokeh serve --dev --show dash
+![Zilgraph Legacy](doc/Zilgraph-Legacy.png)
 
 
-For deployment in the production environment it is recommended using an nginx reverse proxy in front of the bokeh server. Start the bokeh server for zilgraph production environment with:
+# Zilgraph - Architecture 2.0
 
-    ~/zilgraph$ bokeh serve --show dash --allow-websocket-origin="zilgraph.ddns.net"
+In order to allow Zilgraph to scale to the go to place to get insights in all kind of analytics regarding the Zilliqa blockchain, we need to overcome these flaws:
 
+1. ViewblockAPI is nice for doing the job quick, but provides a lot of friction if you want to do solid work. Therefore we need to switch completely to the Zilliqa Seed Node API for acquiring data. Best case, seed node is running locally to avoid unnecessary bandwidth issues.
+2. The Zilcrawler basically stores raw json data in the MongoDB, which provides no real benefit if you are running a local seed node anyhow. This should be replaced by a database which allows advanced queries to search in the data, like Elasticsearch.
+3. Data aggregators will do advanced queries to Elasticsearch and store aggregated data for quick access in MongoDBs.
+3. Zilgraph front end presents aggregated data in a visualized manner.
 
-For the nginx config one can use:
+![Zilgraph Legacy](doc/Zilgraph-Architecture.png)
 
-    ~$ cat /etc/nginx/sites-enabled/default 
-    server {
-        listen 80;
+# Zilgraph Oracle
 
-        location / {
-            proxy_pass http://127.0.0.1:5006;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_http_version 1.1;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header Host $host:$server_port;
-            proxy_buffering off;
-        }
-    }
+The Zilgraph Oracle is an early stage idea. The idea is to provide aggregated data back to the Zilliqa blockchain using a Smart Contract Oracle.
 
-
-
-# Further Work
-
-Community contribution to the project is highly appreciated. If you like to contribute but don't know where to start you could go with one of the open points below.
-
-- [x] Zilswap Dashboard for XSGD, gZIL, BOLT, ZLP and others
-- [x] Daily and hourly OHLC charts for all tokens with historic data back to zilswap contract creation
-- [x] Current Liquidity distribution and total liquidity
-- [x] Current rates and liquidity of the tokens
-- [x] Basic zilswap python library (Get current market data, issue ExactZILforToken/TokenForExactZIL smart contract call)
-    
-- [ ] Make Zilgraph viewed better on mobile devices
-- [ ] Full-featured python zilswap library
-- [ ] Visualization of historic liquidity depth
-- [ ] Adding trading volume to price chart
-- [ ] Use local Zilliqa node as data provider for the Zilcrawler (Do we need a seed node for that?)
-- [ ] Visualization of other commonly used Zilliqa smart contracts (e.g. Staking Contract, Unstoppable Domains)
+![Zilgraph Legacy](doc/Zilgraph-Oracle.png)
