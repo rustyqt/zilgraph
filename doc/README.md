@@ -1,6 +1,8 @@
 # Zilgraph - Legacy Architecture
 
-This first implementation of Zilgraph is a result of the XSGD hackathon. The architecture was designed in a rush for the Hackathon.
+This is the first implementation of Zilgraph and a result of the XSGD hackathon. 
+
+The architecture was designed in a rush and has its flaws.
 
 ![Zilgraph Legacy](drawio/Zilgraph-Legacy.png)
 
@@ -18,6 +20,8 @@ In order to allow Zilgraph to scale to the go to place to get insights in all ki
 
 # Zilgraph Oracle
 
-The Zilgraph Oracle is an early stage idea. The idea is to provide aggregated data back to the Zilliqa blockchain using a Smart Contract Oracle.
+The Zilgraph Oracle is an early stage idea. 
+
+The idea is to provide aggregated data back to the Zilliqa blockchain by a Scilla Smart Contract Oracle.
 
 ![Zilgraph Legacy](drawio/Zilgraph-Oracle.png)
