@@ -8,6 +8,7 @@ from pyzil.zilliqa.api import ZilliqaAPI
 from pyzil.account import Account
 
 from pyzil.contract import Contract
+from pyzil.zilliqa.chain import active_chain
 
 import time
 import json
@@ -35,6 +36,8 @@ class zilswap:
         # Set Zilliqa API
         self.api = ZilliqaAPI("https://api.zilliqa.com/")
         
+        # Set pyzil default API endpoint
+        # active_chain.api = ZilliqaAPI("https://ssn.zillet.io/")
         
         # Load Zilgraph JSON 
         fp_json = open("zilgraph.json")
