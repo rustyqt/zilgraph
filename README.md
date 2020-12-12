@@ -9,7 +9,11 @@ The Zilgraph front-end provides visualized data using bokeh python library.
 
 # Dependencies
 
-The Zilgraph depencies can be install using the following command:
+Zilgraph package dependencies:
+
+    sudo apt install libgmp-dev
+
+The Zilgraph python dependencies can be install using the following command:
 
     pip3 install pyzil pymongo urllib3 requests pandas numpy bokeh
 
