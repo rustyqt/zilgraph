@@ -15,7 +15,7 @@ Zilgraph package dependencies:
 
 The Zilgraph python dependencies can be install using the following command:
 
-    pip3 install pyzil pymongo urllib3 requests pandas numpy bokeh
+    pip3 install pyzil pymongo urllib3 requests pandas numpy bokeh elasticsearch
 
 # Zilcrawler
 
