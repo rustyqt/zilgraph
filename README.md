@@ -28,7 +28,7 @@ Once obtained, the API-KEY need to be stored in your home folder in ~/.viewblock
 
 Finally, you can start the crawler:
 
-    ~/zilgraph/dash$ python3 zilcrawl.py 
+    ~/zilgraph/dash$ python3 crawler.py 
 
 # Start Dashboard
 
