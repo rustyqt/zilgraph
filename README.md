@@ -11,7 +11,7 @@ The Zilgraph front-end provides visualized data using bokeh python library.
 
 Zilgraph package dependencies:
 
-    sudo apt install libgmp-dev
+    sudo apt install libgmp-dev mongodb
 
 The Zilgraph python dependencies can be install using the following command:
 
@@ -32,7 +32,7 @@ Once obtained, the API-KEY need to be stored in your home folder in ~/.viewblock
 
 Finally, you can start the crawler:
 
-    ~/zilgraph/dash$ python3 zilcrawl.py 
+    ~/zilgraph/dash$ python3 crawler.py 
 
 # Start Dashboard
 
