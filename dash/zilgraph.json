@@ -49,6 +49,11 @@
             "addr"     : "zil1a5wkhunysdp9x0nww5qe6m2m8x2m3ygdpuu257",
             "decimals" : 2,
             "verified" : false
+        },
+        "barter" : {
+            "addr"     : "zil17zvlqn2xamqpumlm2pgul9nezzd3ydmrufxnct",
+            "decimals" : 2,
+            "verified" : false
         }
     }
 }
