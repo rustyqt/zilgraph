@@ -44,20 +44,15 @@ class zilcrawl:
         _addr = "zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w"
         self.contract = Contract.load_from_address(_addr, load_state=True)
         
-        # Set account
-        # self.contract.account = account
-        
-        # Set Zilliqa API
-        self.api = ZilliqaAPI("https://api.zilliqa.com/")
-        
         # Set pyzil default API endpoint
         # active_chain.api = ZilliqaAPI("https://ssn.zillet.io/")
-        
+        active_chain.api = ZilliqaAPI("http://localhost:4201")
+
         # Delete existing index
         self.es.indices.delete(index='zilcrawl', ignore=[400, 404])
         
         block_begin = 811030  # Zilswap Contract Creation
-        block_end   = 930000  # Circa 16.12.2020
+        block_end   = 974560  # Circa 17.01.2021
         
         for txblock in range(block_begin, block_end):
             print(str(txblock-block_begin) + " of " + str(block_end-block_begin))
