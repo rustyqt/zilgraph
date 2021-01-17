@@ -13,6 +13,8 @@ from pyzil.zilliqa.chain import active_chain
 import time
 import json
 
+from elasticsearch import Elasticsearch
+
 class pyzilly:
 
   def get_contract(self, contract_addr):
@@ -22,16 +24,13 @@ class pyzilly:
       return contract
     
 class zilswap:
-    def __init__(self, account):
+    def __init__(self):
         # Set mainnet
         chain.set_active_chain(chain.MainNet)  
         
         # Set contract
         _addr = "zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w"
         self.contract = Contract.load_from_address(_addr, load_state=True)
-        
-        # Set account
-        self.contract.account = account
         
         # Set Zilliqa API
         self.api = ZilliqaAPI("https://api.zilliqa.com/")
@@ -45,83 +44,97 @@ class zilswap:
         
         # Setup dictionaries
         self.token = {}
+        self.pools = {}
         self.decimals = {"zil" : 12}
         for tok in self.tokens:
-            self.token[tok]      = Account(address=self.tokens[tok]["addr"])
-            self.decimals[tok]   = self.tokens[tok]["decimals"]
-
-    
-    def get_contract(self):
-        self.contract.get_state()
-        pprint(self.contract.state)
-      
-    def zil_balance(self):
-        balance = self.contract.account.get_balance()
-        return balance
-    
-    def gzil_balance(self):
-        gzil_contract = Contract.load_from_address(self.token["gzil"].bech32_address, load_state=True)
-        balance = float(gzil_contract.state['balances'][self.contract.account.address0x])*1e-15
-        return balance
-    
-    def buy_gzil(self, amount, max_price=2000):
-        # Buy gZIL
-        _min_token_amount = str(int(amount*1e15))
-        _deadline_block = str(int(self.api.GetCurrentMiniEpoch())+15)
-        
-        _params = [Contract.value_dict("token_address", "ByStr20", self.token["gzil"].address0x),
-                   Contract.value_dict("min_token_amount", "Uint128", _min_token_amount),
-                   Contract.value_dict("deadline_block", "BNum", _deadline_block),
-                   Contract.value_dict("recipient_address", "ByStr20", self.contract.account.address0x)]
-        
-        pprint(_params)
-        
-        _zils = Zil(max_price*amount)
-        
-        resp = self.contract.call(method="SwapExactZILForTokens", params=_params, amount=_zils, gas_limit=30000)
-        pprint(resp)
-        pprint(self.contract.last_receipt)
-        
-    def sell_gzil(self, amount, min_price=4000):
-        # Sell gZIL
-        _token_amount = str(int(amount*1e15))
-        _deadline_block = str(int(self.api.GetCurrentMiniEpoch())+15)
-        
-        _min_zil_amount = str(int(min_price*amount*1e12))
-        
-        _params = [Contract.value_dict("token_address", "ByStr20", self.token["gzil"].address0x),
-                   Contract.value_dict("token_amount", "Uint128", _token_amount),
-                   Contract.value_dict("min_zil_amount", "Uint128", _min_zil_amount),
-                   Contract.value_dict("deadline_block", "BNum", _deadline_block),
-                   Contract.value_dict("recipient_address", "ByStr20", self.contract.account.address0x)]
-        
-        pprint(_params)
-        
-        resp = self.contract.call(method="SwapExactTokensForZIL", params=_params, gas_limit=30000)
-        pprint(resp)
-        pprint(self.contract.last_receipt)
-
-    def get_gzil_rate(self):
-        self.contract.get_state()
-        _poolsize = self.contract.state['pools'][self.token["gzil"].address0x]['arguments']
-        _rate = (int(_poolsize[0])*1e-12) / (int(_poolsize[1])*1e-15)
-        return _rate
+            addr = self.tokens[tok]["addr"]
+            self.token[tok]    = Account(address=addr)
+            self.pools[Account(address=addr).address0x]   = tok
+            self.decimals[tok] = self.tokens[tok]["decimals"]
+            
+            
+        query_body = {
+            "query": {
+                "bool": {
+                    "must": [
+                        { "match": { "toAddr": "ba11eb7bcc0a02e947acf03cc651bfaf19c9ec00" } },
+                        { "match": { "receipt.success": True } },
+                        #{ "match": { "data": "*SwapExactZILForTokens*" } },
+                        #{ "match": { "data": "*SwapExactTokensForZIL*" } },
+                        #{ "match": { "data": "*SwapZILForExactTokens*" } },
+                        #{ "match": { "data": "*SwapTokensForExactZIL*" } },
+                        #{ "match": { "data": "*SwapExactTokensForTokens*" } },
+                        #{ "match": { "data": "*SwapTokensForExactTokens*" } },
+                        #{ "match": { "data": "*AddLiquidity*" } },
+                        #{ "match": { "data": "*RemoveLiquidity*" } }
+                        ]
+                    }
+                }
+            }
 
 
-    def get_gzil_market(self):
-        self.contract.get_state()
-        _poolsize = self.contract.state['pools'][self.token["gzil"].address0x]['arguments']
+
+        self.es = Elasticsearch([{'host': '192.168.188.32'}])
+        res = self.es.search(index="zilcrawl", body=query_body, size=10000)
+
+        # Delete existing zilswap index
+        self.es.indices.delete(index='zilswap', ignore=[400, 404])
         
-        _liq_zil = (int(_poolsize[0])*1e-12)
-        _liq_gzil = (int(_poolsize[1])*1e-15)
-        _rate = _liq_zil / _liq_gzil
+        swap = { }
         
-        _market_data_point = {"_id": int(time.time()),
-                              "rate": _rate,
-                              "liq_zil": _liq_zil,
-                              "liq_gzil": _liq_gzil}
-        
-        return _market_data_point
+        for hit in res['hits']['hits']:
+            
+            data = json.loads(hit['_source']['data'])
+            events = json.loads(hit['_source']['receipt']['event_logs'])
+            
+            #pprint(data)
+            #pprint(events)
+            
+            swap = { }
+            
+            swap['ID'] = hit['_source']['ID']
+            swap['@timestamp'] = hit['_source']['@timestamp']
+            swap['timestamp'] =hit['_source']['timestamp']
+            swap['tag'] = data['_tag']
+            
+            if data['_tag'] == "SwapExactZILForTokens" or data['_tag'] == "SwapZILForExactTokens":
+                assert events[0]['params'][0]['vname'] == "pool"
+                assert events[0]['params'][1]['vname'] == "address"
+                assert events[0]['params'][2]['vname'] == "input"
+                assert events[0]['params'][3]['vname'] == "output"
+                
+                swap['pool'] = events[0]['params'][0]['value']
+                swap['addr'] = events[0]['params'][1]['value']
+                
+                if swap['pool'] in self.pools:
+                    swap['name']  = self.pools[swap['pool']]
+                    swap['zil']   = int(events[0]['params'][2]['value']['arguments'][1])*pow(10,-self.decimals['zil'])
+                    swap['tok']   = int(events[0]['params'][3]['value']['arguments'][1])*pow(10,-self.decimals[self.pools[swap['pool']]])
+                    swap['rate']  = swap['zil'] / swap['tok']
+                
+
+            if data['_tag'] == "SwapExactTokensForZIL" or data['_tag'] == "SwapTokensForExactZIL":
+                assert events[0]['params'][0]['vname'] == "pool"
+                assert events[0]['params'][1]['vname'] == "address"
+                assert events[0]['params'][2]['vname'] == "input"
+                assert events[0]['params'][3]['vname'] == "output"
+                
+                swap['pool'] = events[0]['params'][0]['value']
+                swap['addr'] = events[0]['params'][1]['value']
+                
+                if swap['pool'] in self.pools:
+                    swap['name']  = self.pools[swap['pool']]
+                    swap['tok']   = int(events[0]['params'][2]['value']['arguments'][1])*pow(10,-self.decimals[self.pools[swap['pool']]])
+                    swap['zil']   = int(events[0]['params'][3]['value']['arguments'][1])*pow(10,-self.decimals['zil'])
+                    swap['rate']  = swap['zil'] / swap['tok']
+                
+            
+            
+            pprint(swap)
+            
+            
+            self.es.create("zilswap", swap['ID'], swap, ignore=[409])
+
     
         
     def get_market(self, tokenstr):        
@@ -141,3 +154,4 @@ class zilswap:
         return _market_data_point
 
 
+swap = zilswap()

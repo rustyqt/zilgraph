@@ -15,86 +15,81 @@ from datetime import datetime
 
 from pprint import pprint
 
+from pyzil.zilliqa import chain
 from pyzil.account import Account
+from pyzil.contract import Contract
+from pyzil.zilliqa.units import Zil
+from pyzil.zilliqa.api import ZilliqaAPI
 
-from zillog import zillog
+from pyzil.zilliqa.chain import active_chain
 
 from pathlib import Path
 
+from elasticsearch import Elasticsearch
 
 class zilcrawl:
     def __init__(self):
         
-        self.viewblock_zilswap_url = 'https://api.viewblock.io/v1/zilliqa/addresses/zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w/txs?page='
-        try:
-            fp_viewblock_api = open(str(Path.home()) + "/.viewblock.json")
-        except:
-            print("Failed to connect to Viewblock API")
-            print("A ~/.viewblock.json file is required in your home directory with the format:")
-            print("{")
-            print("  \"X-APIKEY\": {")
-            print("    \"key\"    : \"<key_string>\",")
-            print("    \"secret\" : \"<secret_string>\"")
-            print("  }")
-            print("}")
-            sys.exit()
+        # Elasticsearch
+        self.es = Elasticsearch()
         
-        apikey = json.load(fp_viewblock_api)["X-APIKEY"]
-        self.viewblock_headers = { 'X-APIKEY': apikey["key"]}
-
         # Configure MongoDB
         self.mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
         self.mongodb = self.mongoclient["zilcrawl"]
-        
-        # Create database for zilswap contract
-        self.zilswap = self.mongodb["zilswap"]
-        
-        # Load Zilgraph JSON 
-        fp_json = open("zilgraph.json")
-        self.tokens = json.load(fp_json)["tokens"]
-        
-        # Setup dictionaries
-        self.token = {}
-        self.tokendb = {}
-        self.ohlcdb_1h = {}
-        self.ohlcdb_24h = {}
-        self.decimals = {"zil" : 12}
-        self.trade_cnt = {}
-        for tok in self.tokens:
-            self.token[tok]      = Account(address=self.tokens[tok]["addr"])
-            self.tokendb[tok]    = self.mongodb[tok]
-            self.ohlcdb_1h[tok]  = self.mongodb["ohlc_1h_" + tok]
-            self.ohlcdb_24h[tok] = self.mongodb["ohlc_24h_" + tok]
-            self.decimals[tok]   = self.tokens[tok]["decimals"]
-            self.trade_cnt[tok]  = 0
-            
-    # Viewblock Crawler
-    def run(self, debug=False):
-        
-        
-        viewblock_page = []
 
-        for page in range(1,20):
-            try:
-                r = requests.get(self.viewblock_zilswap_url + str(page), headers=self.viewblock_headers)
-                viewblock_page = json.loads(r.content.decode('utf-8'))
-            except:
-                print("Viewblock: GET Request failed")
+        # Set mainnet
+        chain.set_active_chain(chain.MainNet)  
         
-            for entry in viewblock_page:
-                entry['_id'] = entry['hash']
-                try:
-                    self.zilswap.insert_one(entry)
-                except:
-                    print("MongoDB: Insert one failed")
+        # Set contract
+        _addr = "zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w"
+        self.contract = Contract.load_from_address(_addr, load_state=True)
+        
+        # Set account
+        # self.contract.account = account
+        
+        # Set Zilliqa API
+        self.api = ZilliqaAPI("https://api.zilliqa.com/")
+        
+        # Set pyzil default API endpoint
+        # active_chain.api = ZilliqaAPI("https://ssn.zillet.io/")
+        
+        # Delete existing index
+        self.es.indices.delete(index='zilcrawl', ignore=[400, 404])
+        
+        block_begin = 811030  # Zilswap Contract Creation
+        block_end   = 930000  # Circa 16.12.2020
+        
+        for txblock in range(block_begin, block_end):
+            print(str(txblock-block_begin) + " of " + str(block_end-block_begin))
+            try:
+                ublocks = chain.active_chain.api.GetTransactionsForTxBlock(str(txblock))
+            
+                for ublock in ublocks:
+                    for tx_hash in ublock:
+                        tx = chain.active_chain.api.GetTransaction(tx_hash)
+                        
+                        # Serialize events and transitions                        
+                        if 'receipt' in tx:
+                            if 'event_logs' in tx['receipt']:
+                                tx['receipt']['event_logs'] = json.dumps(tx['receipt']['event_logs'])
+                            if 'transitions' in tx['receipt']:
+                                tx['receipt']['transitions'] = json.dumps(tx['receipt']['transitions'])
+                                
+                        #print("----------------------")
+                        #print("-- Modified Mapping --")
+                        #print("----------------------")
+                        #pprint(tx)
+                        try:
+                            self.es.create("zilcrawl", tx['ID'], tx, ignore=[409])
+                        except Exception as e:
+                            print(e)
+                            
                 
-                # Print entry info
-                date_time = datetime.fromtimestamp(int(entry['timestamp']/1000))
-                print("Datetime: " + date_time.strftime("%Y-%m-%d %H:%M:%S"))
-                print(entry['_id'])
-                
-            # Max 3 GET requests per second
-            time.sleep(0.5)
+            except Exception as e:
+                print(e)
+    
+        #print(self.es.indices.get_mapping('zilcrawl'))
+            
 
     # Viewblock Database Crawler
     def analyze(self, debug=False):
@@ -262,5 +257,5 @@ class zilcrawl:
         self.zilswap.delete_many({})
         
 
-
+crawler = zilcrawl()
 

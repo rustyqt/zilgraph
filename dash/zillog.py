@@ -33,7 +33,10 @@ class zillog:
         account = Account(address=addr)
         
         # Instantiate zilswap class
-        self.swap = zilswap(account)
+        self.swap = zilswap(account)        
+        
+        
+        
         
     def run(self, debug=False):
         
