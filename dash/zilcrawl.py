@@ -57,6 +57,9 @@ class zilcrawl:
         for txblock in range(block_begin, block_end):
             print(str(txblock-block_begin) + " of " + str(block_end-block_begin))
             try:
+                block     = chain.active_chain.api.GetTxBlock(str(txblock))
+                timestamp = int(float(block['header']['Timestamp'])/(1e6))
+
                 ublocks = chain.active_chain.api.GetTransactionsForTxBlock(str(txblock))
             
                 for ublock in ublocks:
@@ -69,11 +72,17 @@ class zilcrawl:
                                 tx['receipt']['event_logs'] = json.dumps(tx['receipt']['event_logs'])
                             if 'transitions' in tx['receipt']:
                                 tx['receipt']['transitions'] = json.dumps(tx['receipt']['transitions'])
-                                
+                        
+                        # Add timestamp to TX
+                        tx['BlockNum'] = txblock
+                        tx['timestamp'] = timestamp
+                        tx['@timestamp'] = datetime.fromtimestamp(timestamp).isoformat()
+
                         #print("----------------------")
                         #print("-- Modified Mapping --")
                         #print("----------------------")
                         #pprint(tx)
+
                         try:
                             self.es.create("zilcrawl", tx['ID'], tx, ignore=[409])
                         except Exception as e:
