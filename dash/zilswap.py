@@ -73,9 +73,9 @@ class zilswap:
             }
 
 
-
+        
         self.es = Elasticsearch([{'host': '192.168.188.32'}])
-        res = self.es.search(index="zilcrawl", body=query_body, size=10000)
+        res = self.es.search(index="zilcrawl", body=query_body, size=5000000)
 
         # Delete existing zilswap index
         self.es.indices.delete(index='zilswap', ignore=[400, 404])
