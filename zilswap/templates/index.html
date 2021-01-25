@@ -6,7 +6,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <!-- Custom Style -->
-  <link href="dash/static/css/custom.min.css" rel="stylesheet">
+  <link href="zilswap/static/css/custom.min.css" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="dash/static/favicon.ico">
 
 {% endblock %}
@@ -36,34 +36,8 @@
       </div>
       <!-- /top tiles -->
       
-      <div class="row">
-
-          <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel tile overflow_hidden">
-              <div class="row x_title">
-                <div class="col-md-6">
-                  <h3> Price Chart <small> ZIL Rates</small></h3>
-                </div>
-              </div>
-              
-              <div class="row">
-                <div class="col-md-4 col-sm-4 col-xs-4">
-                </div>
-                <div class="col-md-4 col-sm-4 col-xs-4" align="left">
-                  {{ embed(roots.dropdown_timebase) }}
-                </div>
-                <div class="col-md-4 col-sm-4 col-xs-4" align="left">
-                  {{ embed(roots.dropdown_token) }}
-                  <p style="margin-left:0.5em;"> ✓ Verified by <a href="https://viewblock.io/zilliqa/address/zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w?tab=tokens" target="_blank">Viewblock</a></p>
-                </div>
-              </div>
-              
-              {{ embed(roots.line) }}
-            </div>
-          </div>
-
-      </div>
-
+      <iframe src="https://zilgraph.io:5602/app/dashboards#/view/b1e93a30-5b52-11eb-ae2e-833ae9a51084?embed=true&_g=(filters%3A!(('%24state'%3A(store%3AglobalState)%2Cmeta%3A(alias%3A!n%2CcontrolledBy%3A'1611409921832'%2Cdisabled%3A!f%2Cindex%3A'3d2bb480-5a75-11eb-ae82-8d01e6a7f273'%2Ckey%3Aname.keyword%2Cnegate%3A!f%2Cparams%3A(query%3Axsgd)%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(name.keyword%3Axsgd))))%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-4M%2Cto%3Anow))&show-query-input=true&show-time-filter=true" style="position: relative; height: 1450px; width: 100%;"></iframe>      
+      
       <div class="row">
 
         <div class="col-md-6 col-sm-6 col-xs-12">
@@ -93,11 +67,10 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
         <center>
           <h3>Zilgraph</h3>
-          <p>Zilgraph is an open source Zilswap Dashboard for visualizing zilswap activity on the Zilliqa blockchain.</p>
-          <p>It's providing XSGD and GZIL charts as well as charts from other viewblock verified tokens traded on Zilswap.</p>
-          <p>The data is acquired from the zilswap smart contract and stored in a local MongoDB database.</p>
-          <p>The Zilgraph front-end provides visualized data using bokeh python library.</p>
-          <p> <strong>Warning:</strong> Liquitidy percentage change indicators are dummies only and do not refelect actual market data.</p>
+          <p>Zilgraph is an open source Zilswap Dashboard for visualizing ZilSwap activity on the Zilliqa blockchain.</p>
+          <p>It's providing XSGD and GZIL charts as well as other ZRC-2 tokens.</p>
+          <p>The Zilgraph front-end provides visualized data using elasticsearch, kibana and bokeh python library.</p>
+          <p> <strong>Warning:</strong> Percentage change indicators are dummies only and do not reflect actual market data.</p>
           <h3>Github</h3>
           <a href="https://www.github.com/jsarcher/zilgraph" target="_blank">www.github.com/jsarcher/zilgraph</a>
           <h3> </h3>

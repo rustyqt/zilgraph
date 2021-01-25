@@ -11,7 +11,7 @@ import json
 
     
 class zillog:
-    def __init__(self):
+    def __init__(self, password=""):
         
         # Configure MongoDB
         self.mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -33,7 +33,7 @@ class zillog:
         account = Account(address=addr)
         
         # Instantiate zilswap class
-        self.swap = zilswap(account)        
+        self.zwap = zilswap(password)        
         
         
         
@@ -43,7 +43,7 @@ class zillog:
         for tok in self.token:
             # Get market data and insert in database
             try:    
-                new_entry = self.swap.get_market(tok)
+                new_entry = self.zwap.get_market(tok)
                 self.token[tok].insert_one(new_entry)
                 print(new_entry)
             except:

@@ -21,24 +21,6 @@ import pymongo
 
 
 
-
-###########################
-### Update Price Chart ####
-###########################
-
-class zilgraph:
-    def __init__(self):
-        self.g_tok = "xsgd"
-        self.g_timebase = timebase[1]
-        
-    def update_chart(self, attrname, old, new):
-        self.g_tok = new.split()[-1].lower()
-        source.data.update(ohlc[self.g_timebase][self.g_tok])
-            
-    def update_timebase(self, attrname, old, new):
-        self.g_timebase = tb_dict[new]
-        source.data.update(ohlc[self.g_timebase][self.g_tok])    
-
         
 ###########################
 ###  Init Price Chart  ####
@@ -48,7 +30,7 @@ mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mongodb = mongoclient["zilcrawl"]
 
 # Load Zilgraph JSON 
-fp_json = open("dash/zilgraph.json")
+fp_json = open("zilswap/zilgraph.json")
 tokens = json.load(fp_json)["tokens"]
 
 # Setup dictionaries
@@ -58,88 +40,6 @@ for tok in tokens:
     ohlcdb_1h[tok]  = mongodb["ohlc_1h_" + tok]
     ohlcdb_24h[tok] = mongodb["ohlc_24h_" + tok]
 
-timebase = ["1h", "24h"]
-timebase_options = ["Hourly - 1h", "Daily - 24h"]
-
-tb_dict = {timebase_options[0] : "1h",
-           timebase_options[1] : "24h"}
-
-
-ohlcdb = {"1h" : ohlcdb_1h, "24h" : ohlcdb_24h}
-
-ohlc = { "1h" : {}, "24h" : {}}
-
-for tb in ohlcdb:
-    for tok in tokens:
-        for x in ohlcdb[tb][tok].find().sort('_id'):
-            if tok not in ohlc[tb]:
-                ohlc[tb][tok] = {}
-                ohlc[tb][tok]['time']    = x['time']
-                ohlc[tb][tok]['open']    = x['open']
-                ohlc[tb][tok]['high']    = x['high']
-                ohlc[tb][tok]['low']     = x['low']
-                ohlc[tb][tok]['close']   = x['close']
-                ohlc[tb][tok]['average'] = x['average']
-                ohlc[tb][tok]['color']   = x['color']
-    
-            ohlc[tb][tok]['time'].append(x['time'][0])
-            ohlc[tb][tok]['open'].append(x['open'][0])
-            ohlc[tb][tok]['high'].append(x['high'][0])
-            ohlc[tb][tok]['low'].append(x['low'][0])
-            ohlc[tb][tok]['close'].append(x['close'][0])
-            ohlc[tb][tok]['average'].append(x['average'][0])
-            ohlc[tb][tok]['color'].append(x['color'][0])
-            
-        
-mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
-mongodb = mongoclient["zilcrawl"]
-
-source = ColumnDataSource(dict(time=[], average=[], low=[], high=[], open=[], close=[], color=[]))
-
-p = figure(plot_height=200, tools="pan,wheel_zoom,box_zoom,reset", x_axis_type="datetime", y_axis_location="right")
-p.x_range.follow = "end"
-p.x_range.follow_interval = 10000000000
-p.x_range.range_padding = 0
-
-p.line(x='time', y='average', alpha=0.2, line_width=3, color='navy', source=source)
-p.segment(x0='time', y0='low', x1='time', y1='high', line_width=2, color='black', source=source)
-p.segment(x0='time', y0='open', x1='time', y1='close', line_width=8, color='color', source=source)
-
-layout = column(p, sizing_mode="scale_width", name="line")
-
-curdoc().add_root(layout)
-
-z = zilgraph()
-z.update_chart('tok', 'XSGD', 'XSGD')
-
-# Streaming
-#for x in ohlcdb['xsgd'].find().sort('_id'):
-#    del x['_id']
-#    source.stream(x, 4000)
-
-
-
-###########################
-###    Dropdown Menu   ####
-###########################
-
-dropdown_timebase = Select(value=timebase_options[1], options=timebase_options, name="dropdown_timebase", max_width=150)
-dropdown_timebase.on_change('value', z.update_timebase)
-
-tokens_upper = []
-for tok in tokens:
-    if tokens[tok]["verified"]:
-        tokens_upper.append("✓ " + tok.upper())
-    else:
-        tokens_upper.append(tok.upper())
-
-# UTF-8 Star: ★
-
-dropdown_token = Select(value="✓ XSGD", options=tokens_upper, name="dropdown_token", max_width=150)
-dropdown_token.on_change('value', z.update_chart)
-
-curdoc().add_root(dropdown_timebase)
-curdoc().add_root(dropdown_token)
 
 
 ###########################
@@ -176,7 +76,7 @@ data = pd.DataFrame.from_dict(dict(x), orient='index').reset_index().rename(inde
 data['angle'] = data['value']/total_liq * 2*pi
 data['color'] = Spectral[len(tokens)]
 
-region = figure(plot_height=350, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
+region = figure(plot_height=370, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
 
 region.annular_wedge(x=-0, y=1, inner_radius=0.2, outer_radius=0.32,
                   start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
@@ -215,7 +115,7 @@ columns = [
     TableColumn(field="rate", title="Price [ZIL]",  formatter=StringFormatter(text_align="center")),
     TableColumn(field="liq", title="Liquitidy [ZIL]", formatter=NumberFormatter(text_align="center")),
 ]
-table = DataTable(source=pdsource, columns=columns, height=193, width=330, name="table", sizing_mode="scale_both")
+table = DataTable(source=pdsource, columns=columns, height=205, width=330, name="table", sizing_mode="scale_both")
 
 #layout = row(region, table)
 curdoc().add_root(region)
@@ -230,14 +130,10 @@ curdoc().add_root(table)
 # Calculate change
 total_liq_change = 0.01
 xsgd_liq_change = 0.01
-pairs_change = 150.0
+gzil_change = 0.01
+pairs_change = 0.01
 
-#ohlc["24h"]['gzil']['time'][-1]
-#ohlc["24h"]['gzil']['close'][-1]
-gzil_rate = ohlc["24h"]['gzil']['close'][-1]
-gzil_rate_1wk = ohlc["24h"]['gzil']['close'][-8]
-
-gzil_change = round((gzil_rate / gzil_rate_1wk - 1)*100, 2)
+gzil_rate = round(_rate['gzil'][-1],2)
 
 curdoc().title = "Zilgraph - A Zilswap Dashboard"
 curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']

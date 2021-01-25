@@ -28,15 +28,16 @@ from pathlib import Path
 from elasticsearch import Elasticsearch
 
 class zilcrawl:
-    def __init__(self):
+    def __init__(self, password=""):
         
         # Elasticsearch
-        self.es = Elasticsearch()
+        self.es = Elasticsearch(http_auth=('elastic', password))
         
         # Configure MongoDB
         self.mongoclient = pymongo.MongoClient("mongodb://localhost:27017/")
         self.mongodb = self.mongoclient["zilcrawl"]
 
+    def run(self):
         # Set mainnet
         chain.set_active_chain(chain.MainNet)  
         
@@ -49,13 +50,35 @@ class zilcrawl:
         active_chain.api = ZilliqaAPI("http://localhost:4201")
 
         # Delete existing index
-        self.es.indices.delete(index='zilcrawl', ignore=[400, 404])
+        # self.es.indices.delete(index='zilcrawl', ignore=[400, 404])
+
+        query_body = {
+            "aggs" : {
+                "max_id" : {
+                    "max" : { 
+                        "field" : "BlockNum"
+                    }
+                }
+            },
+            "size":0
+        }
+
+        block_begin = 0
+        try:
+            res = self.es.search(index="zilcrawl", body=query_body, size=0)
+            block_begin = int(res['aggregations']['max_id']['value'])+1
+        except Exception as e:
+            print(e)
+            block_begin = 811030  # Zilswap Contract Creation
         
-        block_begin = 811030  # Zilswap Contract Creation
-        block_end   = 974560  # Circa 17.01.2021
-        
+
+        block_end   = int(chain.active_chain.api.GetNumTxBlocks())
+
+        #print("block_begin = " + str(block_begin))
+        #print("block_end = " + str(block_end))
+
         for txblock in range(block_begin, block_end):
-            print(str(txblock-block_begin) + " of " + str(block_end-block_begin))
+            print(str(txblock) + " of " + str(block_end-1))
             try:
                 block     = chain.active_chain.api.GetTxBlock(str(txblock))
                 timestamp = int(float(block['header']['Timestamp'])/(1e6))
