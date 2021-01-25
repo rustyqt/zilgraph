@@ -1,11 +1,11 @@
 # Zilgraph - A Zilswap Dashboard
-Zilgraph is an open source tool for visualizing Zilswap activity on the Zilliqa blockchain. It provides token OHLC charts - daily and hourly, liquitidy distribution and more.
+Zilgraph is an open source tool for visualizing Zilswap activity on the Zilliqa blockchain. It provides ZRC-2 token charts, volume, liquitidy distribution and more.
 
-Zilgraph is launched here:  [Zilgraph](http://zilgraph.ddns.net)
+Zilgraph is launched here:  [Zilgraph](https://zilgraph.io)
 
-The data is acquired from the zilswap smart contract and stored in a local MongoDB database.
+The Zilliqa blockchain is systematically crawled and all data is stored in elasticsearch. With adequate elasticsearch queries zilswap data is aggregated. This builds the foundation to add more analytics for other smart contracts.
 
-The Zilgraph front-end provides visualized data using bokeh python library.
+The Zilgraph front-end provides visualized data using bokeh python library and embedded kibana dashboard.
 
 # Dependencies
 
@@ -28,53 +28,29 @@ The Zilgraph python dependencies can be install using the following command:
 
 # Zilcrawler
 
-The Zilcrawler is a crawler collecting and processing all the data required for the charts presented on Zilgraph. It is interfacing the zilswap smart contract through pyzil API as well as the viewblock API. For the latter we need an API-KEY which can be acquired from viewblock for free after registration. (see https://viewblock.io/api)
-
-Once obtained, the API-KEY need to be stored in your home folder in ~/.viewblock.json with the following format:
-
-    {
-        "X-APIKEY": {
-            "key"    : "<key_string>",
-            "secret" : "<secret_string>"
-        }
-    }
+The Zilcrawler is a crawler collecting and processing all the data required for the charts presented on Zilgraph. It is interfacing a Zilliqa seed node. Acquired data is stored in a elasticsearch index. As the crawler is fetching every single transaction ever executed on the Zilliqa blockchain, it is recommended to run a local Zilliqa seed node.
 
 Finally, you can start the crawler:
 
-    ~/zilgraph/dash$ python3 crawler.py 
+    ~/zilgraph/zilswap$ python3 crawler.py 
 
 # Start Dashboard
 
 The dashboard is described in *main.py* and makes use of the python bokeh library. The default deployment uses port 5006 on your localhost.
 
-For development purpose you can use the bokeh server to launch the website at http://localhost:5006
+For local development purpose you can use the bokeh server to launch the website at http://localhost:5006
 
-    ~/zilgraph$ bokeh serve --dev --show dash
+    ~/zilgraph$ bokeh serve --dev --show zilswap
 
 
 For deployment in the production environment it is recommended using an nginx reverse proxy in front of the bokeh server. Start the bokeh server for zilgraph production environment with:
 
-    ~/zilgraph$ bokeh serve --show dash --allow-websocket-origin="zilgraph.ddns.net"
+    ~/zilgraph$ bokeh serve --show zilswap --allow-websocket-origin='zilgraph.io' --dev --use-xheaders
 
 
 For the nginx config one can use:
 
-    ~$ cat /etc/nginx/sites-enabled/default 
-    server {
-        listen 80;
-
-        location / {
-            proxy_pass http://127.0.0.1:5006;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_http_version 1.1;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header Host $host:$server_port;
-            proxy_buffering off;
-        }
-    }
-
+    ~/zilgraph$ cp etc/nginx/conf.d/zilgraph.io.conf /etc/nginx/conf.d/zilgraph.io.conf
 
 
 # Further Work
@@ -87,9 +63,9 @@ Community contribution to the project is highly appreciated. If you like to cont
 - [x] Current rates and liquidity of the tokens
 - [x] Basic zilswap python library (Get current market data, issue ExactZILforToken/TokenForExactZIL smart contract call)
     
-- [ ] Make Zilgraph viewed better on mobile devices
+- [x] Make Zilgraph viewed better on mobile devices
 - [ ] Full-featured python zilswap library
 - [ ] Visualization of historic liquidity depth
-- [ ] Adding trading volume to price chart
-- [ ] Use local Zilliqa node as data provider for the Zilcrawler (Do we need a seed node for that?)
+- [x] Adding trading volume to price chart
+- [x] Use local Zilliqa seed node as data provider for the Zilcrawler
 - [ ] Visualization of other commonly used Zilliqa smart contracts (e.g. Staking Contract, Unstoppable Domains)
