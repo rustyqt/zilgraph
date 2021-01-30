@@ -2,58 +2,51 @@
     "tokens" : {
         "gzil"  : {
             "addr"     : "zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e",
-            "decimals" : 15,
-            "verified" : true
+            "decimals" : 15
         },
         "xsgd"  : {
             "addr"     : "zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t",
-            "decimals" : 6,
-            "verified" : true
+            "decimals" : 6
         },
         "bolt"  : {
             "addr" : "zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0",
-            "decimals" : 18,
-            "verified" : true
+            "decimals" : 18
         },
         "zlp"   : {
             "addr" : "zil1l0g8u6f9g0fsvjuu74ctyla2hltefrdyt7k5f4",
-            "decimals" : 18,
-            "verified" : true
+            "decimals" : 18
         },
         "zyf"   : {
             "addr" : "zil1arrjugcg28rw8g9zxpa6qffc6wekpwk2alu7kj",
-            "decimals" : 3,
-            "verified" : false
+            "decimals" : 3
         },
-        "sergs" : {
-            "addr" : "zil1ztmv5jhfpnxu95ts9ylup7hj73n5ka744jm4ea",
-            "decimals" : 5,
-            "verified" : false
+        "port" : {
+            "addr" : "zil18f5rlhqz9vndw4w8p60d0n7vg3n9sqvta7n6t2",
+            "decimals" : 4
         },
         "shrk" : {
             "addr"     : "zil17tsmlqgnzlfxsq4evm6n26txm2xlp5hele0kew",
-            "decimals" : 6,
-            "verified" : false
+            "decimals" : 6
         },
         "carb" : {
             "addr"     : "zil1hau7z6rjltvjc95pphwj57umdpvv0d6kh2t8zk",
-            "decimals" : 8,
-            "verified" : false
+            "decimals" : 8
         },
         "zlf" : {
             "addr"     : "zil1r9dcsrya4ynuxnzaznu00e6hh3kpt7vhvzgva0",
-            "decimals" : 5,
-            "verified" : true
+            "decimals" : 5
         },
         "redc" : {
             "addr"     : "zil1a5wkhunysdp9x0nww5qe6m2m8x2m3ygdpuu257",
-            "decimals" : 2,
-            "verified" : false
+            "decimals" : 2
+        },
+        "zyro": {
+            "addr"     : "zil1ucvrn22x8366vzpw5t7su6eyml2auczu6wnqqg",
+            "decimals" : 8
         },
         "barter" : {
             "addr"     : "zil17zvlqn2xamqpumlm2pgul9nezzd3ydmrufxnct",
-            "decimals" : 2,
-            "verified" : false
+            "decimals" : 2
         }
     }
 }

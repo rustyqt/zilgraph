@@ -11,6 +11,7 @@ from pyzil.contract import Contract
 from pyzil.zilliqa.chain import active_chain
 
 import time
+from datetime import datetime
 import json
 
 from elasticsearch import Elasticsearch
@@ -32,10 +33,8 @@ class zilswap:
         _addr = "zil1hgg7k77vpgpwj3av7q7vv5dl4uvunmqqjzpv2w"
         self.contract = Contract.load_from_address(_addr, load_state=True)
         
-        # Set Zilliqa API
-        self.api = ZilliqaAPI("https://api.zilliqa.com/")
-        
         # Set pyzil default API endpoint
+        # active_chain.api = ZilliqaAPI("https://api.zilliqa.com/")
         # active_chain.api = ZilliqaAPI("https://ssn.zillet.io/")
         active_chain.api = ZilliqaAPI("http://localhost:4201")
         
@@ -124,7 +123,7 @@ class zilswap:
                             swap['zil']   = int(events[0]['params'][2]['value']['arguments'][1])*pow(10,-self.decimals['zil'])
                             swap['tok']   = int(events[0]['params'][3]['value']['arguments'][1])*pow(10,-self.decimals[self.pools[swap['pool']]])
                             swap['rate']  = swap['zil'] / swap['tok']
-                        
+                            swap['apy'] = self.get_apy(swap['name'])
         
                     if data['_tag'] == "SwapExactTokensForZIL" or data['_tag'] == "SwapTokensForExactZIL":
                         assert events[0]['params'][0]['vname'] == "pool"
@@ -142,7 +141,7 @@ class zilswap:
                             swap['tok']   = int(events[0]['params'][2]['value']['arguments'][1])*pow(10,-self.decimals[self.pools[swap['pool']]])
                             swap['zil']   = int(events[0]['params'][3]['value']['arguments'][1])*pow(10,-self.decimals['zil'])
                             swap['rate']  = swap['zil'] / swap['tok']
-                        
+                            swap['apy'] = self.get_apy(swap['name'])
                     
                     if data['_tag'] == "AddLiquidity":
                         #pprint(events)
@@ -161,9 +160,9 @@ class zilswap:
                                             
                         if swap['pool'] in self.pools:
                             swap['name'] = self.pools[swap['pool']]
-                            swap['zil']  = int(hit['_source']['amount'])*pow(10,-self.decimals['zil'])                            
-                            swap['tok']  = int(events[1]['params'][3]['value'])*pow(10,-self.decimals[self.pools[swap['pool']]])                            
-                            swap['rate'] = swap['zil'] / swap['tok']
+                            swap['zil_liq']  = int(hit['_source']['amount'])*pow(10,-self.decimals['zil'])                            
+                            swap['tok_liq']  = int(events[1]['params'][3]['value'])*pow(10,-self.decimals[self.pools[swap['pool']]])                            
+                            swap['rate'] = swap['zil_liq'] / swap['tok_liq']
                             
                             if transitions[2]['msg']['params'][3]['vname'] == "new_to_bal":                            
                                 swap['liquidity_tok'] = int(transitions[2]['msg']['params'][3]['value'])*pow(10,-self.decimals[self.pools[swap['pool']]])
@@ -189,9 +188,9 @@ class zilswap:
                         
                         if swap['pool'] in self.pools:
                             swap['name']  = self.pools[swap['pool']]
-                            swap['zil']  = int(transitions[0]['msg']['_amount'])*pow(10,-self.decimals['zil'])
-                            swap['tok'] = int(events[1]['params'][2]['value'])*pow(10,-self.decimals[self.pools[swap['pool']]])
-                            swap['rate'] = swap['zil'] / swap['tok']
+                            swap['zil_liq']  = int(transitions[0]['msg']['_amount'])*pow(10,-self.decimals['zil'])
+                            swap['tok_liq'] = int(events[1]['params'][2]['value'])*pow(10,-self.decimals[self.pools[swap['pool']]])
+                            swap['rate'] = swap['zil_liq'] / swap['tok_liq']
                             
                             
                             
@@ -220,7 +219,95 @@ class zilswap:
                               "liq_"+tokenstr: _liq_token}
         
         return _market_data_point
+    
+    def get_state(self, tokenstr):        
+        self.contract.get_state()
+        _poolsize = self.contract.state['pools'][self.token[tokenstr].address0x]['arguments']
+        
+        zil_liq = int(_poolsize[0])*1e-12
+        tok_liq = int(_poolsize[1])*pow(10,-self.decimals[tokenstr])
+        rate = zil_liq / tok_liq
+        
+        _market_data_point = {"name": tokenstr,
+                              "rate": rate,
+                              "zil_liq": zil_liq,
+                              "tok_liq": tok_liq}
+        
+        return _market_data_point
+    
+    def get_volume(self, tokenstr):
+        
+        # Query monthly volume
+        query = {
+          "aggs": {
+            "1": {
+              "sum": {
+                "field": "zil"
+              }
+            }
+          },
+          "size": 0,
+          "stored_fields": [
+            "*"
+          ],
+          "script_fields": {},
+          "docvalue_fields": [
+            {
+              "field": "@timestamp",
+              "format": "date_time"
+            }
+          ],
+          "_source": {
+            "excludes": []
+          },
+          "query": {
+            "bool": {
+              "must": [],
+              "filter": [
+                {
+                  "match_all": {}
+                },
+                {
+                  "match_phrase": {
+                    "name.keyword": tokenstr
+                  }
+                },
+                {
+                  "range": {
+                    "@timestamp": {
+                      "gte": datetime.fromtimestamp(int(time.time()-30.42*24*3600)).isoformat(),
+                      "lte": datetime.fromtimestamp(int(time.time())).isoformat(),
+                      "format": "strict_date_optional_time"
+                    }
+                  }
+                }
+              ],
+              "should": [],
+              "must_not": []
+            }
+          }
+        }
 
+        res = self.es.search(index="zilswap", body=query, size=0)
+        return res['aggregations']['1']['value']
+        
+    def get_apy(self, tokenstr):
+        
+        # Get Volume
+        volume = self.get_volume(tokenstr)
+        self.contract.get_state()
+        poolsize = self.contract.state['pools'][self.token[tokenstr].address0x]['arguments']
+        
+        # Get Liquiditiy
+        liq_zil = int(poolsize[0])*1e-12
+        
+        # Set Fees
+        fees = 0.003
+        
+        apy = 12*volume*fees/(2*liq_zil)
+        
+        return apy
+    
     def mrproper(self):
         # Delete existing zilswap index
         self.es.indices.delete(index='zilswap', ignore=[400, 404])

@@ -8,7 +8,7 @@ from bokeh.io import curdoc
 from bokeh.layouts import column, gridplot, row
 from bokeh.models import (ColumnDataSource, DataTable, NumberFormatter,
                           RangeTool, StringFormatter, TableColumn, HoverTool, Select, Slider, Div)
-from bokeh.palettes import Spectral
+from bokeh.palettes import Category20
 from bokeh.plotting import figure
 from bokeh.transform import cumsum
 
@@ -32,14 +32,6 @@ mongodb = mongoclient["zilcrawl"]
 # Load Zilgraph JSON 
 fp_json = open("zilswap/zilgraph.json")
 tokens = json.load(fp_json)["tokens"]
-
-# Setup dictionaries
-ohlcdb_1h = {}
-ohlcdb_24h = {}
-for tok in tokens:
-    ohlcdb_1h[tok]  = mongodb["ohlc_1h_" + tok]
-    ohlcdb_24h[tok] = mongodb["ohlc_24h_" + tok]
-
 
 
 ###########################
@@ -74,9 +66,9 @@ total_liq = sum(x.values())
 
 data = pd.DataFrame.from_dict(dict(x), orient='index').reset_index().rename(index=str, columns={0:'value', 'index':'token'})
 data['angle'] = data['value']/total_liq * 2*pi
-data['color'] = Spectral[len(tokens)]
+data['color'] = Category20[len(tokens)]
 
-region = figure(plot_height=370, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
+region = figure(plot_height=400, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
 
 region.annular_wedge(x=-0, y=1, inner_radius=0.2, outer_radius=0.32,
                   start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
@@ -115,7 +107,7 @@ columns = [
     TableColumn(field="rate", title="Price [ZIL]",  formatter=StringFormatter(text_align="center")),
     TableColumn(field="liq", title="Liquitidy [ZIL]", formatter=NumberFormatter(text_align="center")),
 ]
-table = DataTable(source=pdsource, columns=columns, height=205, width=330, name="table", sizing_mode="scale_both")
+table = DataTable(source=pdsource, columns=columns, height=220, width=330, name="table", sizing_mode="scale_both")
 
 #layout = row(region, table)
 curdoc().add_root(region)
