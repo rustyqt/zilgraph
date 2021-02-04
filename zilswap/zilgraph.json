@@ -8,6 +8,10 @@
             "addr"     : "zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t",
             "decimals" : 6
         },
+        "zwap"  : {
+            "addr"     : "zil1p5suryq6q647usxczale29cu3336hhp376c627",
+            "decimals" : 12
+        },
         "bolt"  : {
             "addr" : "zil1x6z064fkssmef222gkhz3u5fhx57kyssn7vlu0",
             "decimals" : 18
