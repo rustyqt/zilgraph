@@ -28,7 +28,7 @@ account = Account(private_key=key_pair[1])
 print("Account balance: {}".format(account.get_balance()))
 
 
-# load additional accounts from zilkeys.txt
+# Load additional accounts from zilkeys.txt
 # This file contains multiple accounts - one account each line.
 keys = []
 with open('zilkeys.txt', 'r') as fp:
@@ -64,6 +64,7 @@ while True:
  
 
 # Fund accounts with some ZILs from main account
+# This should be solved programmatically....
  
 #batch = [BatchTransfer(to_addr='zil14747autzr6jyfqp0tweu0xvfuk8pf7vn4ph55p', zils=200),
 #         BatchTransfer(to_addr='zil1fa6j4jn76qhyk7fka7y3xxrms8gfan7jf3ak82', zils=200),
@@ -72,6 +73,7 @@ while True:
 #         BatchTransfer(to_addr='zil106dszpun2x73vtjtvg3q8dpk0xle48u37z0dpy', zils=200),
 #         BatchTransfer(to_addr='zil1ntqajukc6r2kjvdtgk6wumu6ds966qwkf6fk9j', zils=200),
 #         BatchTransfer(to_addr='zil1dnz8ghlw2dmhd7csa5ntgh42rzyxsujq8zd0np', zils=200),
+#         BatchTransfer(to_addr='zil19w0e59cvadetzmez3k2497wzz3zm49wp8y2vx3', zils=200),
 #         BatchTransfer(to_addr='zil1nfhzwa8yn379dsa9gzmffd4y2fw8kkcukzfjt8', zils=200),
 #         BatchTransfer(to_addr='zil146plghecnjgrw029x2xlzeqklclj8x6aqq7gzd', zils=200)]
 #
