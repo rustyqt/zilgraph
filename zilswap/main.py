@@ -78,9 +78,9 @@ region.axis.axis_label=None
 region.axis.visible=False
 region.grid.grid_line_color = None
 region.legend.label_text_font_size = "1.5em"
-region.legend.spacing = 5
+region.legend.spacing = 2
 region.legend.glyph_height = 20
-region.legend.label_height = 20
+region.legend.label_height = 16
 
 # configure so that no drag tools are active
 region.toolbar.active_drag = None
@@ -99,8 +99,13 @@ for tok in tokens:
     table_dict["rate"].append(round(_rate[tok][-1],2))
     table_dict["liq"].append(int(_liq[tok][-1]))
 
+# Create Panda data frame
+df = pd.DataFrame(table_dict)
 
-pdsource = ColumnDataSource(data=pd.DataFrame(table_dict))
+# Sort by Liquidity
+df.sort_values(by=['liq'], inplace=True, ascending=False)
+
+pdsource = ColumnDataSource(data=df)
 
 columns = [
     TableColumn(field="tok", title="Token", formatter=StringFormatter(text_align="center")),
@@ -118,23 +123,24 @@ curdoc().add_root(table)
 ###        Setup       ####
 ###########################
 
+curdoc().title = "Zilgraph - A Zilswap Dashboard"
 
 # Calculate change
-total_liq_change = 0.01
-xsgd_liq_change = 0.01
-gzil_change = 0.01
-pairs_change = 0.01
+#total_liq_change = 0.01
+#xsgd_liq_change = 0.01
+#gzil_change = 0.01
+#pairs_change = 0.01
+#
+#gzil_rate = round(_rate['gzil'][-1],2)
+#
 
-gzil_rate = round(_rate['gzil'][-1],2)
-
-curdoc().title = "Zilgraph - A Zilswap Dashboard"
-curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']
-curdoc().template_variables['stats'] = {
-    'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  total_liq_change   , 'label': 'Total Liquidity'},
-    'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  xsgd_liq_change , 'label': 'XSGD Liquidity'},
-    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  pairs_change , 'label': 'Tokens'},
-    'sales'     : {'icon': 'dollar',      'value': str(int(gzil_rate)) + " ZIL",  'change': gzil_change , 'label': 'gZIL Token Price'},
-}
+#curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']
+#curdoc().template_variables['stats'] = {
+#    'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  total_liq_change   , 'label': 'Total Liquidity'},
+#    'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  xsgd_liq_change , 'label': 'XSGD Liquidity'},
+#    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  pairs_change , 'label': 'Tokens'},
+#    'sales'     : {'icon': 'dollar',      'value': str(int(gzil_rate)) + " ZIL",  'change': gzil_change , 'label': 'gZIL Token Price'},
+#}
 
 #_rate['gzil'][-1])
 

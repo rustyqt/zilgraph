@@ -51,6 +51,11 @@
         "barter" : {
             "addr"     : "zil17zvlqn2xamqpumlm2pgul9nezzd3ydmrufxnct",
             "decimals" : 2
+        },
+        "zch" : {
+            "addr"     : "zil1s8xzysqcxva2x6aducncv9um3zxr36way3fx9g",
+            "decimals" : 6
         }
     }
 }
+

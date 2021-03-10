@@ -11,33 +11,41 @@
 
 {% endblock %}
 
+
+
+
 {% block contents %}
 
 <div class="container body">
   <center>
-  <div class="main_container" style="max-width:1200px; margin-top:-2em;">
+  <div class="main_container" style="max-width:1200px; margin-top:0em;">
 
     
     <!-- page content -->
     <div class="right_col" role="main">
 
+      <head>
+        <title>Zilgraph</title>
+      </head>
       <!-- top tiles -->
-      <div class="row tile_count">
-        
-        {% for name in stats_names %}
-        <div class="col-md-3 col-sm-6 col-xs-6 tile_stats_count" style="margin-top:1em;">
-          <span class="count_top"><i class="fa fa-{{stats[name].icon}}"></i> {{ stats[name].label }}</span>
-          <div class="count">{{ stats[name].value }}</div>
-          {% set color = "green" if stats[name].change >0 else "red" %}
-          {% set dir = "asc" if stats[name].change >0 else "desc" %}
-          <span class="count_bottom"><i class="{{color}}"}><i class="fa fa-sort-{{dir}}"></i>{{ stats[name].change }}% </i> From last Week</span>
-        </div>
-        {% endfor %}
-      </div>
+      <iframe src="https://zilgraph.io:5602/app/dashboards#/view/6cfee270-6ca1-11eb-a247-333025c7ed72?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-1y%2Cto%3Anow))&hide-filter-bar=true" style="position: relative; height: 185px; width: 100%;"></iframe>
       <!-- /top tiles -->
-      
-      <iframe src="https://zilgraph.io:5602/app/dashboards#/view/b1e93a30-5b52-11eb-ae2e-833ae9a51084?embed=true&_g=(filters%3A!(('%24state'%3A(store%3AglobalState)%2Cmeta%3A(alias%3A!n%2CcontrolledBy%3A'1611409921832'%2Cdisabled%3A!f%2Cindex%3A'3d2bb480-5a75-11eb-ae82-8d01e6a7f273'%2Ckey%3Aname.keyword%2Cnegate%3A!f%2Cparams%3A(query%3Axsgd)%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(name.keyword%3Axsgd))))%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-4M%2Cto%3Anow))&show-query-input=true&show-time-filter=true" style="position: relative; height: 1650px; width: 100%;"></iframe>      
-      
+
+      <!-- body -->
+      <div class="row">
+        <div class="col-md-4 col-sm-4 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <iframe src="https://zilgraph.io:3001" style="position: relative; height: 1220px; width: 100%;"></iframe>
+          </div>
+        </div>
+        <div class="col-md-8 col-sm-8 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <iframe src="https://zilgraph.io:5602/app/dashboards#/view/b1e93a30-5b52-11eb-ae2e-833ae9a51084?embed=true&_g=(filters%3A!(('%24state'%3A(store%3AglobalState)%2Cmeta%3A(alias%3A!n%2CcontrolledBy%3A'1611409921832'%2Cdisabled%3A!f%2Cindex%3A'3d2bb480-5a75-11eb-ae82-8d01e6a7f273'%2Ckey%3Aname.keyword%2Cnegate%3A!f%2Cparams%3A(query%3Axsgd)%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(name.keyword%3Axsgd))))%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-4M%2Cto%3Anow))&show-time-filter=true" style="position: relative; height: 1220px; width: 100%;"></iframe>      
+          </div>
+        </div>
+      </div>
+      <!-- /body -->
+
       <div class="row">
 
         <div class="col-md-6 col-sm-6 col-xs-12">
@@ -70,7 +78,6 @@
           <p>Zilgraph is an open source Zilswap Dashboard for visualizing ZilSwap activity on the Zilliqa blockchain.</p>
           <p>It's providing XSGD and GZIL charts as well as other ZRC-2 tokens.</p>
           <p>The Zilgraph front-end provides visualized data using elasticsearch, kibana and bokeh python library.</p>
-          <p> <strong>Warning:</strong> Percentage change indicators are dummies only and do not reflect actual market data.</p>
           <h3>Github</h3>
           <a href="https://www.github.com/jsarcher/zilgraph" target="_blank">www.github.com/jsarcher/zilgraph</a>
           <h3> </h3>
