@@ -68,7 +68,7 @@ data = pd.DataFrame.from_dict(dict(x), orient='index').reset_index().rename(inde
 data['angle'] = data['value']/total_liq * 2*pi
 data['color'] = Category20[len(tokens)]
 
-region = figure(plot_height=400, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
+region = figure(plot_height=420, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
 
 region.annular_wedge(x=-0, y=1, inner_radius=0.2, outer_radius=0.32,
                   start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
@@ -112,7 +112,7 @@ columns = [
     TableColumn(field="rate", title="Price [ZIL]",  formatter=StringFormatter(text_align="center")),
     TableColumn(field="liq", title="Liquitidy [ZIL]", formatter=NumberFormatter(text_align="center")),
 ]
-table = DataTable(source=pdsource, columns=columns, height=220, width=330, name="table", sizing_mode="scale_both")
+table = DataTable(source=pdsource, columns=columns, height=232, width=330, name="table", sizing_mode="scale_both")
 
 #layout = row(region, table)
 curdoc().add_root(region)
