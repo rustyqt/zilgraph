@@ -55,6 +55,10 @@
         "zch" : {
             "addr"     : "zil1s8xzysqcxva2x6aducncv9um3zxr36way3fx9g",
             "decimals" : 6
+        },
+        "duck" : {
+            "addr"     : "zil1c6akv8k6dqaac7ft8ezk5gr2jtxrewfw8hc27d",
+            "decimals" : 2
         }
     }
 }
