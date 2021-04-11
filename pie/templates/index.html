@@ -1,0 +1,56 @@
+{% extends base %}
+{% block preamble %}
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Custom Style -->
+  <link href="pie/static/css/custom.min.css" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="pie/static/favicon.ico">
+
+{% endblock %}
+
+
+
+
+{% block contents %}
+
+<div class="container body">
+  <center>
+  <div class="main_container" style="max-width:1200px; margin-top:0em;">
+
+      <div class="row">
+
+        <div class="col-md-6 col-sm-6 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <div class="x_title">
+              <h2>Liquitidy Distribution</h2>
+              <div class="clearfix"></div>
+            </div>
+            {{ embed(roots.region) }}
+          </div>
+        </div>
+
+
+        <div class="col-md-6 col-sm-6 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <div class="x_title">
+              <h2>Token Details</h2>
+              <div class="clearfix"></div>
+            </div>
+            {{ embed(roots.table) }}
+          </div>
+        </div>
+
+      </div>
+      
+     
+    </div>
+
+  </div>
+  </center>
+</div>
+<!-- /page content -->
+
+{% endblock %}
