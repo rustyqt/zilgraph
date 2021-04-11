@@ -46,8 +46,8 @@ class zilcrawl:
         self.contract = Contract.load_from_address(_addr, load_state=True)
         
         # Set pyzil default API endpoint
-        # active_chain.api = ZilliqaAPI("https://ssn.zillet.io/")
-        active_chain.api = ZilliqaAPI("http://localhost:4201")
+        active_chain.api = ZilliqaAPI("https://ssn.zillet.io/")
+        # active_chain.api = ZilliqaAPI("http://localhost:4201")
 
         # Delete existing index
         # self.es.indices.delete(index='zilcrawl', ignore=[400, 404])

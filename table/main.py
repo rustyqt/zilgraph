@@ -55,37 +55,6 @@ for tok in tokens:
         _liq[tok].append(x['liq_zil'])
         _rate[tok].append(x['rate'])
         
-pie_dict = {}
-for tok in tokens:
-    pie_dict[tok.upper()] = int(_liq[tok][-1])
-
-print(pie_dict)
-
-x = Counter(pie_dict)
-total_liq = sum(x.values())
-
-data = pd.DataFrame.from_dict(dict(x), orient='index').reset_index().rename(index=str, columns={0:'value', 'index':'token'})
-data['angle'] = data['value']/total_liq * 2*pi
-data['color'] = Category20[len(tokens)]
-
-region = figure(plot_height=420, toolbar_location=None, outline_line_color=None, sizing_mode="scale_both", name="region", x_range=(-0.5, 0.8))
-
-region.annular_wedge(x=-0, y=1, inner_radius=0.2, outer_radius=0.32,
-                  start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
-                  line_color="white", fill_color='color', legend_group='token', source=data)
-
-region.axis.axis_label=None
-region.axis.visible=False
-region.grid.grid_line_color = None
-region.legend.label_text_font_size = "1.5em"
-region.legend.spacing = 2
-region.legend.glyph_height = 20
-region.legend.label_height = 16
-
-# configure so that no drag tools are active
-region.toolbar.active_drag = None
-
-
 ###########################
 ###        Table       ####
 ###########################
@@ -114,8 +83,6 @@ columns = [
 ]
 table = DataTable(source=pdsource, columns=columns, height=232, width=330, name="table", sizing_mode="scale_both")
 
-#layout = row(region, table)
-curdoc().add_root(region)
 curdoc().add_root(table)
 
 
@@ -124,41 +91,6 @@ curdoc().add_root(table)
 ###########################
 
 curdoc().title = "Zilgraph - A Zilswap Dashboard"
-
-# Calculate change
-#total_liq_change = 0.01
-#xsgd_liq_change = 0.01
-#gzil_change = 0.01
-#pairs_change = 0.01
-#
-#gzil_rate = round(_rate['gzil'][-1],2)
-#
-
-#curdoc().template_variables['stats_names'] = ['total_liq', 'xsgd_liq', 'pairs', 'sales']
-#curdoc().template_variables['stats'] = {
-#    'total_liq' : {'icon': 'user',        'value': str(int(total_liq)) + " ZIL", 'change':  total_liq_change   , 'label': 'Total Liquidity'},
-#    'xsgd_liq'  : {'icon': 'user',        'value': str(int(_liq['xsgd'][-1])) + " ZIL",   'change':  xsgd_liq_change , 'label': 'XSGD Liquidity'},
-#    'pairs'     : {'icon': 'user',        'value': len(tokens), 'change':  pairs_change , 'label': 'Tokens'},
-#    'sales'     : {'icon': 'dollar',      'value': str(int(gzil_rate)) + " ZIL",  'change': gzil_change , 'label': 'gZIL Token Price'},
-#}
-
-#_rate['gzil'][-1])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
