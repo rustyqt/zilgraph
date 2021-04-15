@@ -9,6 +9,7 @@ import time
 import pymongo
 import json
 
+from elasticsearch import Elasticsearch
     
 class zillog:
     def __init__(self, password=""):
@@ -35,6 +36,8 @@ class zillog:
         # Instantiate zilswap class
         self.zwap = zilswap(password)        
         
+        # Elasticsearch
+        self.es = Elasticsearch(http_auth=('elastic', password))
         
         
         
@@ -43,11 +46,20 @@ class zillog:
         for tok in self.token:
             # Get market data and insert in database
             try:    
+                # MongoDB
                 new_entry = self.zwap.get_market(tok)
                 self.token[tok].insert_one(new_entry)
                 print(new_entry)
             except:
                 print("Error: MongoDB insert_one() " + tok)
+
+            try:
+                # Elasticserach
+                es_entry = self.zwap.get_state(tok)
+                self.es.create("zillog", hash(frozenset(es_entry.items())), es_entry, ignore=[409])
+                print(es_entry)
+            except:
+                print("Error: Elasticsearch create() " + tok)
 
 
             # Print database

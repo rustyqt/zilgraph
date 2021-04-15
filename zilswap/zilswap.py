@@ -221,6 +221,8 @@ class zilswap:
         return _market_data_point
     
     def get_state(self, tokenstr):        
+        _time = int(time.time())
+        _timestamp = datetime.fromtimestamp(_time).isoformat()
         self.contract.get_state()
         _poolsize = self.contract.state['pools'][self.token[tokenstr].address0x]['arguments']
         
@@ -228,7 +230,8 @@ class zilswap:
         tok_liq = int(_poolsize[1])*pow(10,-self.decimals[tokenstr])
         rate = zil_liq / tok_liq
         
-        _market_data_point = {"name": tokenstr,
+        _market_data_point = {"@timestamp": _timestamp,
+                              "name": tokenstr,
                               "rate": rate,
                               "zil_liq": zil_liq,
                               "tok_liq": tok_liq}
