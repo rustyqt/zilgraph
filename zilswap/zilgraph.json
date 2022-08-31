@@ -52,6 +52,10 @@
             "addr"     : "zil17zvlqn2xamqpumlm2pgul9nezzd3ydmrufxnct",
             "decimals" : 2
         },
+        "zap"  : {
+            "addr" : "zil1h8xtgsmt83af58h3g6tygnxe5jt66c876uac03",
+            "decimals" : 18
+        },
         "zch" : {
             "addr"     : "zil1s8xzysqcxva2x6aducncv9um3zxr36way3fx9g",
             "decimals" : 6
